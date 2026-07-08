@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Novaris Technologies — Dashboard Clients</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --brand:#6C3FC5;--brand-dark:#5530A3;--brand-dim:rgba(108,63,197,0.10);
+  --green:#22C55E;--green-dim:rgba(34,197,94,0.10);
+  --blue:#3B82F6;--blue-dim:rgba(59,130,246,0.10);
+  --amber:#F59E0B;--red:#EF4444;
+  --navy:#0F172A;--navy-mid:#1E293B;
+  --white:#FFFFFF;--bg:#F8FAFC;--card:#FFFFFF;
+  --text:#0F172A;--muted:#64748B;--border:#E2E8F0;
+  --sidebar:240px;--radius:12px;
+  --shadow:0 1px 3px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.04);
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:14px}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);background:var(--navy);position:fixed;top:0;bottom:0;left:0;z-index:200;display:flex;flex-direction:column}
+.sb-logo{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:10px}
+.sb-logo-icon{width:32px;height:32px;background:var(--brand);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-logo-icon svg{color:#fff;width:18px;height:18px}
+.sb-logo-text h2{font-size:.82rem;font-weight:700;color:#fff;line-height:1.2}
+.sb-logo-text span{font-size:.65rem;color:rgba(255,255,255,0.35);display:block;margin-top:1px}
+.sb-section{padding:14px 12px 6px;font-size:.62rem;font-weight:700;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:.1em}
+.sb-nav{flex:1;padding:0 8px;overflow-y:auto}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 12px;color:rgba(255,255,255,0.55);font-size:.8rem;font-weight:500;cursor:pointer;border-radius:8px;transition:all .18s;margin-bottom:1px;border:none;background:none;width:100%;text-align:left}
+.ni:hover{color:#fff;background:rgba(255,255,255,0.06)}
+.ni.active{color:#fff;background:rgba(108,63,197,0.35);font-weight:600}
+.ni svg{width:15px;height:15px;flex-shrink:0}
+.ni-badge{margin-left:auto;background:var(--brand);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:100px;min-width:18px;text-align:center}
+.live-pulse{width:7px;height:7px;background:#22C55E;border-radius:50%;margin-left:auto;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.sb-footer{padding:14px 16px;border-top:1px solid rgba(255,255,255,0.07)}
+.sb-footer .version{font-size:.65rem;color:rgba(255,255,255,0.25);margin-bottom:6px}
+.sb-footer .user{display:flex;align-items:center;gap:8px}
+.sb-avatar{width:28px;height:28px;background:var(--brand);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;flex-shrink:0}
+.sb-user-info strong{display:block;font-size:.75rem;font-weight:600;color:#fff}
+.sb-user-info span{font-size:.65rem;color:rgba(255,255,255,0.35)}
+.lang-toggle{display:flex;gap:4px;margin-top:8px}
+.lt-btn{flex:1;padding:4px;border:1px solid rgba(255,255,255,0.15);border-radius:5px;background:none;color:rgba(255,255,255,0.4);font-size:.68rem;font-weight:600;cursor:pointer;transition:all .18s;font-family:'Inter',sans-serif}
+.lt-btn.active{background:var(--brand);border-color:var(--brand);color:#fff}
+
+/* MAIN */
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:11px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-left h1{font-size:.9rem;font-weight:600;color:var(--navy)}
+.topbar-left p{font-size:.72rem;color:var(--muted);margin-top:1px}
+.topbar-right{display:flex;gap:8px;align-items:center}
+.status-pill{display:inline-flex;align-items:center;gap:5px;font-size:.72rem;font-weight:600;padding:4px 10px;border-radius:100px}
+.sp-live{background:var(--green-dim);color:#15803D}
+.sp-warn{background:rgba(245,158,11,0.12);color:#92400E}
+.btn{border:none;padding:6px 14px;border-radius:7px;font-family:'Inter',sans-serif;font-size:.77rem;font-weight:600;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:5px}
+.btn svg{width:13px;height:13px}
+.btn-brand{background:var(--brand);color:#fff}.btn-brand:hover{background:var(--brand-dark)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--navy)}.btn-outline:hover{background:var(--bg)}
+.btn-danger{background:transparent;border:1px solid #FECACA;color:var(--red)}.btn-danger:hover{background:#FEF2F2}
+.btn-sm{padding:4px 10px;font-size:.72rem}
+
+.content{padding:20px 24px;flex:1}
+.panel{display:none}.panel.active{display:block}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.mc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;transition:box-shadow .2s}
+.mc:hover{box-shadow:var(--shadow)}
+.mc-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.mc-icon svg{width:16px;height:16px}
+.mc .lbl{font-size:.68rem;color:var(--muted);font-weight:500;margin-bottom:2px}
+.mc .val{font-size:1.5rem;font-weight:700;color:var(--navy);line-height:1}
+.mc .sub{font-size:.67rem;color:var(--muted);margin-top:3px}
+.mc.brand .mc-icon{background:var(--brand-dim)}.mc.brand .mc-icon svg{color:var(--brand)}.mc.brand .val{color:var(--brand)}
+.mc.green .mc-icon{background:var(--green-dim)}.mc.green .mc-icon svg{color:#15803D}.mc.green .val{color:#15803D}
+.mc.blue .mc-icon{background:var(--blue-dim)}.mc.blue .mc-icon svg{color:#1D4ED8}.mc.blue .val{color:#1D4ED8}
+.mc.amber .mc-icon{background:rgba(245,158,11,0.1)}.mc.amber .mc-icon svg{color:#92400E}.mc.amber .val{color:#92400E}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:.85rem;font-weight:600;color:var(--navy)}
+.card-sub{font-size:.72rem;color:var(--muted);margin-top:1px}
+.empty-state{text-align:center;padding:36px 20px;color:var(--muted);font-size:.83rem;line-height:1.6}
+
+/* NOTIF */
+.notif-toast{position:fixed;bottom:20px;right:20px;z-index:999;background:var(--navy-mid);color:#fff;padding:12px 16px;border-radius:12px;font-size:.8rem;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,0.25);transform:translateY(80px);opacity:0;transition:all .3s;max-width:340px;border-left:3px solid var(--brand)}
+.notif-toast.show{transform:translateY(0);opacity:1}
+.notif-toast .ndot{width:8px;height:8px;background:#22C55E;border-radius:50%;flex-shrink:0;animation:pulse 2s infinite}
+
+/* RESPONSE LIST */
+.resp-list{display:flex;flex-direction:column;gap:6px}
+.rrow{border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:box-shadow .18s;background:var(--card)}
+.rrow:hover{box-shadow:var(--shadow)}
+.rrow.expanded .rbody{display:block}
+.rhead{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:10px 14px;cursor:pointer;background:var(--bg);border-bottom:1px solid transparent}
+.rrow.expanded .rhead{border-bottom-color:var(--border);background:var(--white)}
+.ravatar{width:34px;height:34px;border-radius:50%;background:var(--brand-dim);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--brand);flex-shrink:0}
+.rname{font-size:.83rem;font-weight:600;color:var(--navy)}
+.rbiz{font-size:.72rem;color:var(--muted);margin-top:1px}
+.rmeta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.rdate{font-size:.68rem;color:var(--muted)}
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:100px;white-space:nowrap}
+.b-new{background:rgba(34,197,94,0.12);color:#15803D}
+.b-seen{background:var(--blue-dim);color:#1D4ED8}
+.b-proposal{background:var(--brand-dim);color:var(--brand-dark)}
+.b-won{background:rgba(34,197,94,0.2);color:#14532D}
+.b-score-hi{background:rgba(34,197,94,0.12);color:#15803D}
+.b-score-mid{background:rgba(245,158,11,0.12);color:#92400E}
+.b-score-lo{background:rgba(239,68,68,0.1);color:#B91C1C}
+.rbody{display:none;padding:14px}
+
+/* DETAIL SECTIONS */
+.det-section{margin-bottom:14px}
+.det-label{font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.det-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.det-item .dl{font-size:.65rem;color:var(--muted);font-weight:600;margin-bottom:2px}
+.det-item .dv{font-size:.8rem;color:var(--text)}
+
+/* TRANSLATION BOX */
+.tbox{background:linear-gradient(135deg,var(--brand-dim),var(--blue-dim));border:1px solid rgba(108,63,197,0.2);border-radius:10px;padding:12px 14px;margin-bottom:12px}
+.tbox-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.tbox-badge{background:var(--brand);color:#fff;font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.04em}
+.tbox-label{font-size:.68rem;font-weight:700;color:var(--brand-dark)}
+.tbox-free{background:#DCFCE7;color:#15803D;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:4px}
+.tbox-content{font-size:.8rem;color:var(--text);line-height:1.65}
+.tbox-section{margin-bottom:8px}
+.tbox-section:last-child{margin-bottom:0}
+.tbox-section .ts-label{font-size:.63rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.tbox-section .ts-val{font-size:.8rem;color:var(--text);line-height:1.55}
+.tloading{font-size:.78rem;color:var(--muted);font-style:italic}
+
+/* FEAT TAGS */
+.feat-wrap{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.ft{font-size:.63rem;font-weight:700;padding:2px 7px;border-radius:4px}
+.ft-must{background:rgba(34,197,94,0.12);color:#15803D}
+.ft-nice{background:var(--blue-dim);color:#1D4ED8}
+.ft-no{background:rgba(239,68,68,0.08);color:#B91C1C}
+
+/* SCORE BAR */
+.score-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.score-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.score-fill{height:100%;border-radius:3px;transition:width .5s ease}
+.score-label{font-size:.72rem;font-weight:600;min-width:48px;text-align:right}
+
+/* ACTIONS */
+.act-row{display:flex;gap:6px;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--border);margin-top:12px}
+.status-sel{font-size:.72rem;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--white);color:var(--text);font-family:'Inter',sans-serif;cursor:pointer}
+
+/* PROPOSAL */
+.proposal-wrap{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.pf label{display:block;font-size:.72rem;font-weight:600;color:var(--navy);margin-bottom:3px;margin-top:10px}
+.pf label:first-child{margin-top:0}
+.pf input,.pf select,.pf textarea{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:'Inter',sans-serif;font-size:.8rem;color:var(--text);outline:none;transition:border-color .18s;background:var(--white)}
+.pf input:focus,.pf select:focus,.pf textarea:focus{border-color:var(--brand)}
+.pf textarea{min-height:68px;resize:vertical;line-height:1.55}
+.prop-out{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:.78rem;line-height:1.8;white-space:pre-wrap;font-family:'Inter',sans-serif;color:var(--text);min-height:200px}
+
+/* INSIGHTS */
+.ins-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ins-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.ins-title{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+.bar-item{margin-bottom:7px}
+.bar-lrow{display:flex;justify-content:space-between;font-size:.73rem;margin-bottom:2px;color:var(--muted)}
+.bar-lrow .bl{color:var(--text)}
+.bar-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+
+/* PIPELINE */
+.pipe-board{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.pipe-col-head{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:6px 10px;border-radius:6px;margin-bottom:6px;text-align:center}
+.ph-new{background:var(--green-dim);color:#15803D}
+.ph-proposal{background:var(--brand-dim);color:var(--brand-dark)}
+.ph-followup{background:rgba(245,158,11,0.1);color:#92400E}
+.ph-won{background:rgba(34,197,94,0.2);color:#14532D}
+.pipe-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin-bottom:6px}
+.pc-name{font-size:.78rem;font-weight:600;color:var(--navy)}
+.pc-biz{font-size:.68rem;color:var(--muted);margin-top:1px}
+.pc-val{font-size:.73rem;font-weight:600;color:var(--brand);margin-top:4px}
+.pipe-empty{font-size:.72rem;color:var(--muted);text-align:center;padding:14px 8px;border:1px dashed var(--border);border-radius:8px}
+
+@media(max-width:960px){
+  .sidebar{width:56px}.sb-logo-text,.sb-section,.sb-user-info,.lang-toggle,.ni span,.ni-badge,.live-pulse{display:none}
+  .main{margin-left:56px}.metrics{grid-template-columns:1fr 1fr}
+  .proposal-wrap{grid-template-columns:1fr}.ins-grid{grid-template-columns:1fr}
+  .pipe-board{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ── CONFIG ── -->
+<script>
+const SUPABASE_URL = 'https://aoeonvhohwgcjnvswlbt.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_259KgrJGFJIQnN4edkYGhw_e4gdyqq2';
+// Traduction : MyMemory API — 100% gratuit, 5000 mots/jour, aucun compte requis
+</script>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+    </div>
+    <div class="sb-logo-text">
+      <h2>Novaris</h2>
+      <span>Technologies Inc.</span>
+    </div>
+  </div>
+
+  <div class="sb-nav">
+    <div class="sb-section">Clients</div>
+    <button class="ni active" onclick="showP('reponses',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      <span id="t-responses">Réponses</span>
+      <span class="ni-badge" id="nb-new">0</span>
+    </button>
+    <button class="ni" onclick="showP('pipeline',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      <span id="t-pipeline">Pipeline</span>
+    </button>
+    <div class="sb-section">Outils</div>
+    <button class="ni" onclick="showP('propose',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      <span id="t-devis">Générer Devis</span>
+    </button>
+    <button class="ni" onclick="showP('insights',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
+      <span id="t-insights">Insights</span>
+    </button>
+  </div>
+
+  <div class="sb-footer">
+    <div class="version">v1.0 · Novaris Technologies</div>
+    <div class="user">
+      <div class="sb-avatar">PE</div>
+      <div class="sb-user-info">
+        <strong>Patrick Essono</strong>
+        <span>Directeur Technique</span>
+      </div>
+    </div>
+    <!-- Toggle FR / EN -->
+    <div class="lang-toggle" style="margin-top:8px">
+      <button class="lt-btn active" id="btn-fr" onclick="setLang('fr')">FR</button>
+      <button class="lt-btn" id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1 id="panel-title">Réponses Survey</h1>
+      <p id="panel-sub">Shining Legacy — Danielle</p>
+    </div>
+    <div class="topbar-right">
+      <span class="status-pill sp-live" id="live-badge">● Temps réel</span>
+      <span class="badge b-seen" id="count-badge">0</span>
+      <button class="btn btn-outline btn-sm" onclick="loadAll()">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        <span id="t-refresh">Actualiser</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- MÉTRIQUES -->
+    <div class="metrics">
+      <div class="mc brand">
+        <div class="mc-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+        <div class="lbl" id="m-lbl-total">Total réponses</div><div class="val" id="m-total">0</div><div class="sub" id="m-sub-total">Tous les clients</div>
+      </div>
+      <div class="mc green">
+        <div class="mc-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg></div>
+        <div class="lbl" id="m-lbl-new">Nouvelles</div><div class="val" id="m-new">0</div><div class="sub" id="m-sub-new">À consulter</div>
+      </div>
+      <div class="mc blue">
+        <div class="mc-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+        <div class="lbl" id="m-lbl-pipe">Pipeline estimé</div><div class="val" id="m-pipe">$0</div><div class="sub" id="m-sub-pipe">Valeur totale</div>
+      </div>
+      <div class="mc amber">
+        <div class="mc-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div>
+        <div class="lbl" id="m-lbl-budget">Budget populaire</div><div class="val" id="m-budget">—</div><div class="sub" id="m-sub-budget">Le plus sélectionné</div>
+      </div>
+    </div>
+
+    <!-- RÉPONSES -->
+    <div class="panel active" id="panel-reponses">
+      <div class="card">
+        <div class="card-head">
+          <div><div class="card-title" id="ct-responses">Soumissions reçues</div><div class="card-sub" id="cs-responses">Cliquez sur une réponse pour voir les détails et la traduction</div></div>
+          <select id="filter-status" onchange="renderList()" style="font-size:.75rem;padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--white);color:var(--text)">
+            <option value="" id="f-all">Tous</option>
+            <option value="new" id="f-new">Nouveaux</option>
+            <option value="reviewed" id="f-rev">Consultés</option>
+            <option value="proposal_sent" id="f-prop">Devis envoyé</option>
+            <option value="won" id="f-won">Signés</option>
+          </select>
+        </div>
+        <div class="resp-list" id="resp-list">
+          <div class="empty-state" id="empty-msg">En attente des premières réponses de Danielle…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PIPELINE -->
+    <div class="panel" id="panel-pipeline">
+      <div class="pipe-board" id="pipe-board">
+        <div><div class="pipe-col-head ph-new" id="ph-new">Nouveau lead</div><div id="pipe-new"></div></div>
+        <div><div class="pipe-col-head ph-proposal" id="ph-proposal">Devis envoyé</div><div id="pipe-proposal"></div></div>
+        <div><div class="pipe-col-head ph-followup" id="ph-followup">Suivi requis</div><div id="pipe-followup"></div></div>
+        <div><div class="pipe-col-head ph-won" id="ph-won">Signé</div><div id="pipe-won"></div></div>
+      </div>
+    </div>
+
+    <!-- DEVIS -->
+    <div class="panel" id="panel-propose">
+      <div class="proposal-wrap">
+        <div class="card">
+          <div class="card-title" id="ct-devis" style="margin-bottom:12px">Paramètres du devis</div>
+          <div class="pf">
+            <label id="pl-name">Nom du client</label><input type="text" id="p-name" placeholder="ex. Danielle">
+            <label id="pl-biz">Entreprise</label><input type="text" id="p-biz" placeholder="ex. Shining Legacy Cleaning Inc">
+            <label id="pl-pkg">Forfait</label>
+            <select id="p-pkg">
+              <option value="essential" id="pkg-e">Essentiel — 2 500 $ (site + chatbot + SEO)</option>
+              <option value="growth" id="pkg-g">Croissance — 3 900 $ (+ automation + booking)</option>
+              <option value="full" id="pkg-f">Complet — 6 200 $ (+ dashboard + portail + paiements)</option>
+              <option value="custom" id="pkg-c">Personnalisé</option>
+            </select>
+            <label id="pl-price">Prix personnalisé (optionnel)</label><input type="text" id="p-price" placeholder="ex. 4 200 $">
+            <label id="pl-feats">Fonctionnalités incluses (une par ligne)</label>
+            <textarea id="p-feats" placeholder="Chatbot IA (24/7)&#10;Formulaire devis instantané&#10;Portail client&#10;Paiement en ligne (Stripe)&#10;SEO — GTA"></textarea>
+            <label id="pl-timeline">Délai de livraison</label><input type="text" id="p-timeline" placeholder="ex. 2–3 semaines">
+            <label id="pl-monthly">Option mensuelle</label><input type="text" id="p-monthly" placeholder="ex. 250 $/mois après lancement">
+            <label id="pl-note">Note personnelle</label>
+            <textarea id="p-note" placeholder="Référence à quelque chose mentionné dans le survey…"></textarea>
+            <button class="btn btn-brand" style="margin-top:12px;width:100%;padding:9px;justify-content:center" onclick="genProposal()">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <span id="btn-gen">Générer le devis</span>
+            </button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title" id="ct-preview" style="margin-bottom:10px">Aperçu du devis</div>
+          <div class="prop-out" id="prop-out" id="prop-placeholder">Remplis les paramètres et clique "Générer".</div>
+          <button class="btn btn-outline" style="margin-top:8px;width:100%;justify-content:center" onclick="copyProp()">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+            <span id="btn-copy">Copier dans le presse-papier</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSIGHTS -->
+    <div class="panel" id="panel-insights">
+      <div class="ins-grid">
+        <div class="ins-card"><div class="ins-title" id="ins-t1">Fonctionnalités "must have"</div><div id="feat-chart"><div class="empty-state" style="padding:14px;font-size:.78rem">Aucune donnée</div></div></div>
+        <div class="ins-card"><div class="ins-title" id="ins-t2">Distribution des budgets</div><div id="budget-chart"><div class="empty-state" style="padding:14px;font-size:.78rem">Aucune donnée</div></div></div>
+        <div class="ins-card"><div class="ins-title" id="ins-t3">Sources de leads actuelles</div><div id="source-chart"><div class="empty-state" style="padding:14px;font-size:.78rem">Aucune donnée</div></div></div>
+        <div class="ins-card"><div class="ins-title" id="ins-t4">Pain points opérationnels</div><div id="pain-chart"><div class="empty-state" style="padding:14px;font-size:.78rem">Aucune donnée</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div class="notif-toast" id="toast">
+  <div class="ndot"></div>
+  <span id="toast-msg"></span>
+</div>
+
+<script>
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ── LANGUE ──
+let LANG = 'fr';
+const T = {
+  fr: {
+    panels:{ reponses:'Réponses Survey', pipeline:'Pipeline Clients', propose:'Générer un Devis', insights:'Insights' },
+    responses:'Soumissions reçues', responses_sub:'Cliquez sur une réponse pour voir les détails et la traduction',
+    refresh:'Actualiser', live:'● Temps réel', connecting:'○ Connexion...',
+    new:'Nouveau', seen:'Consulté', proposal:'Devis envoyé', won:'Signé',
+    score_hi:'Priorité haute', score_mid:'Priorité moyenne', score_lo:'Priorité basse',
+    mark_seen:'Marquer vu', create_quote:'Créer devis', delete:'Supprimer', change_status:'Changer statut...',
+    translate_btn:'Voir en français', translating:'Traduction en cours (gratuit)…',
+    translated:'Traduit par MyMemory', free:'GRATUIT',
+    empty:'En attente des premières réponses…',
+    m_total:'Total réponses', m_new:'Nouvelles', m_pipe:'Pipeline estimé', m_budget:'Budget populaire',
+    ms_total:'Tous les clients', ms_new:'À consulter', ms_pipe:'Valeur totale', ms_budget:'Le plus sélectionné',
+    f_all:'Tous', f_new:'Nouveaux', f_rev:'Consultés', f_prop:'Devis envoyé', f_won:'Signés',
+    det_email:'Email', det_phone:'Téléphone', det_team:'Taille équipe', det_years:'Années actif',
+    det_mrr:'Revenus actuels', det_target:'Objectif revenu', det_timeline:'Délai souhaité',
+    det_phased:'Approche phasée', det_quote:'Méthode devis', det_response:'Temps réponse',
+    det_website:'Site actuel', det_assets:'Assets disponibles',
+    det_features:'Priorités fonctionnelles', det_goal:'Objectif principal',
+    gen_btn:'Générer le devis', copy_btn:'Copier dans le presse-papier',
+    pipe_new:'Nouveau lead', pipe_proposal:'Devis envoyé', pipe_followup:'Suivi requis', pipe_won:'Signé',
+    ins_t1:'Fonctionnalités "must have"', ins_t2:'Distribution budgets', ins_t3:'Sources de leads', ins_t4:'Pain points',
+    devis_title:'Paramètres du devis', preview_title:'Aperçu du devis',
+    pl_name:'Nom du client', pl_biz:'Entreprise', pl_pkg:'Forfait',
+    pl_price:'Prix personnalisé (optionnel)', pl_feats:'Fonctionnalités (une par ligne)',
+    pl_timeline:'Délai', pl_monthly:'Option mensuelle', pl_note:'Note personnelle',
+    pkg_e:'Essentiel — 2 500 $ (site + chatbot + SEO)', pkg_g:'Croissance — 3 900 $ (+ automation)',
+    pkg_f:'Complet — 6 200 $ (+ dashboard + portail)', pkg_c:'Personnalisé',
+    toast_new:'Nouvelle réponse de',
+    proposal_subject:'Objet : Votre proposition personnalisée —',
+    proposal_hi:'Bonjour', proposal_thanks:'Merci d\'avoir rempli notre questionnaire. Voici votre proposition personnalisée pour',
+    proposal_pkg:'Forfait', proposal_invest:'Investissement', proposal_monthly_opt:'Option mensuelle',
+    proposal_delay:'Délai', proposal_features:'FONCTIONNALITÉS INCLUSES',
+    proposal_support:'Support post-lancement 30 jours', proposal_revision:'1 ronde de révisions incluse',
+    proposal_ownership:'Propriété totale du code et du domaine',
+    proposal_why:'POURQUOI CE FORFAIT', proposal_steps:'PROCHAINES ÉTAPES',
+    proposal_s1:'Répondez avec vos questions ou ajustements',
+    proposal_s2:'Signature de l\'entente (numérique, 2 minutes)',
+    proposal_s3:'Démarrage dans les 48h suivant la signature',
+    proposal_closing:'Au plaisir de travailler ensemble,', proposal_title:'Directeur Technique & Consultant Digital',
+    ft_must:'Essentiel', ft_nice:'Souhaitable', ft_no:'Non requis',
+    score_label:'Score de priorité',
+    feat_names:{feat_chatbot:'Chatbot IA',feat_quote:'Formulaire devis',feat_portal:'Portail client',feat_payment:'Paiement en ligne',feat_automation:'Automation',feat_seo:'SEO',feat_booking:'Réservation',feat_live_chat:'Chat live'}
+  },
+  en: {
+    panels:{ reponses:'Survey Responses', pipeline:'Client Pipeline', propose:'Generate Quote', insights:'Insights' },
+    responses:'All submissions', responses_sub:'Click a response to see details and translation',
+    refresh:'Refresh', live:'● Live', connecting:'○ Connecting...',
+    new:'New', seen:'Reviewed', proposal:'Quote Sent', won:'Won',
+    score_hi:'High priority', score_mid:'Medium priority', score_lo:'Low priority',
+    mark_seen:'Mark reviewed', create_quote:'Create quote', delete:'Delete', change_status:'Change status...',
+    translate_btn:'View in French', translating:'Translating (free)…',
+    translated:'Translated by MyMemory', free:'FREE',
+    empty:'Waiting for first responses…',
+    m_total:'Total responses', m_new:'New', m_pipe:'Pipeline value', m_budget:'Top budget',
+    ms_total:'All clients', ms_new:'To review', ms_pipe:'Estimated total', ms_budget:'Most selected',
+    f_all:'All', f_new:'New', f_rev:'Reviewed', f_prop:'Quote sent', f_won:'Won',
+    det_email:'Email', det_phone:'Phone', det_team:'Team size', det_years:'Years active',
+    det_mrr:'Current revenue', det_target:'Revenue target', det_timeline:'Timeline',
+    det_phased:'Phased approach', det_quote:'Quote method', det_response:'Response time',
+    det_website:'Current website', det_assets:'Assets ready',
+    det_features:'Feature priorities', det_goal:'Primary goal',
+    gen_btn:'Generate quote', copy_btn:'Copy to clipboard',
+    pipe_new:'New lead', pipe_proposal:'Quote sent', pipe_followup:'Follow-up', pipe_won:'Won',
+    ins_t1:'Must-have features', ins_t2:'Budget distribution', ins_t3:'Lead sources', ins_t4:'Pain points',
+    devis_title:'Quote parameters', preview_title:'Quote preview',
+    pl_name:'Client name', pl_biz:'Business name', pl_pkg:'Package',
+    pl_price:'Custom price (optional)', pl_feats:'Features (one per line)',
+    pl_timeline:'Timeline', pl_monthly:'Monthly option', pl_note:'Personal note',
+    pkg_e:'Essential — $2,500 (site + chatbot + SEO)', pkg_g:'Growth — $3,900 (+ automation)',
+    pkg_f:'Full — $6,200 (+ dashboard + portal)', pkg_c:'Custom',
+    toast_new:'New response from',
+    proposal_subject:'Subject: Your personalized proposal —',
+    proposal_hi:'Hi', proposal_thanks:'Thank you for completing our assessment. Here is your personalized proposal for',
+    proposal_pkg:'Package', proposal_invest:'Investment', proposal_monthly_opt:'Monthly option',
+    proposal_delay:'Timeline', proposal_features:'INCLUDED FEATURES',
+    proposal_support:'30-day post-launch support', proposal_revision:'1 round of revisions included',
+    proposal_ownership:'Full ownership of your code and domain',
+    proposal_why:'WHY THIS PACKAGE', proposal_steps:'NEXT STEPS',
+    proposal_s1:'Reply with any questions or adjustments',
+    proposal_s2:'Sign the agreement (digital, 2 minutes)',
+    proposal_s3:'We start within 48h of signing',
+    proposal_closing:'Looking forward to working together,', proposal_title:'Technical Director & Digital Consultant',
+    ft_must:'Must have', ft_nice:'Nice to have', ft_no:'Not needed',
+    score_label:'Priority score',
+    feat_names:{feat_chatbot:'AI Chatbot',feat_quote:'Quote Form',feat_portal:'Client Portal',feat_payment:'Online Payment',feat_automation:'Automation',feat_seo:'SEO',feat_booking:'Booking',feat_live_chat:'Live Chat'}
+  }
+};
+
+function t(key){ return T[LANG][key] || key; }
+
+function setLang(l){
+  LANG = l;
+  document.getElementById('btn-fr').classList.toggle('active', l==='fr');
+  document.getElementById('btn-en').classList.toggle('active', l==='en');
+  applyLang();
+  renderList();
+}
+
+function applyLang(){
+  const L = T[LANG];
+  // Topbar
+  document.getElementById('live-badge').textContent = L.live;
+  document.getElementById('t-refresh').textContent = L.refresh;
+  // Nav
+  document.getElementById('t-responses').textContent = L.panels.reponses;
+  document.getElementById('t-pipeline').textContent = L.panels.pipeline;
+  document.getElementById('t-devis').textContent = L.panels.propose;
+  document.getElementById('t-insights').textContent = L.panels.insights;
+  // Cards
+  document.getElementById('ct-responses').textContent = L.responses;
+  document.getElementById('cs-responses').textContent = L.responses_sub;
+  // Metrics
+  document.getElementById('m-lbl-total').textContent = L.m_total;
+  document.getElementById('m-sub-total').textContent = L.ms_total;
+  document.getElementById('m-lbl-new').textContent = L.m_new;
+  document.getElementById('m-sub-new').textContent = L.ms_new;
+  document.getElementById('m-lbl-pipe').textContent = L.m_pipe;
+  document.getElementById('m-sub-pipe').textContent = L.ms_pipe;
+  document.getElementById('m-lbl-budget').textContent = L.m_budget;
+  document.getElementById('m-sub-budget').textContent = L.ms_budget;
+  // Filters
+  document.getElementById('f-all').textContent = L.f_all;
+  document.getElementById('f-new').textContent = L.f_new;
+  document.getElementById('f-rev').textContent = L.f_rev;
+  document.getElementById('f-prop').textContent = L.f_prop;
+  document.getElementById('f-won').textContent = L.f_won;
+  // Pipeline
+  document.getElementById('ph-new').textContent = L.pipe_new;
+  document.getElementById('ph-proposal').textContent = L.pipe_proposal;
+  document.getElementById('ph-followup').textContent = L.pipe_followup;
+  document.getElementById('ph-won').textContent = L.pipe_won;
+  // Insights
+  document.getElementById('ins-t1').textContent = L.ins_t1;
+  document.getElementById('ins-t2').textContent = L.ins_t2;
+  document.getElementById('ins-t3').textContent = L.ins_t3;
+  document.getElementById('ins-t4').textContent = L.ins_t4;
+  // Devis
+  document.getElementById('ct-devis').textContent = L.devis_title;
+  document.getElementById('ct-preview').textContent = L.preview_title;
+  document.getElementById('pl-name').textContent = L.pl_name;
+  document.getElementById('pl-biz').textContent = L.pl_biz;
+  document.getElementById('pl-pkg').textContent = L.pl_pkg;
+  document.getElementById('pl-price').textContent = L.pl_price;
+  document.getElementById('pl-feats').textContent = L.pl_feats;
+  document.getElementById('pl-timeline').textContent = L.pl_timeline;
+  document.getElementById('pl-monthly').textContent = L.pl_monthly;
+  document.getElementById('pl-note').textContent = L.pl_note;
+  document.getElementById('pkg-e').textContent = L.pkg_e;
+  document.getElementById('pkg-g').textContent = L.pkg_g;
+  document.getElementById('pkg-f').textContent = L.pkg_f;
+  document.getElementById('pkg-c').textContent = L.pkg_c;
+  document.getElementById('btn-gen').textContent = L.gen_btn;
+  document.getElementById('btn-copy').textContent = L.copy_btn;
+  document.getElementById('empty-msg').textContent = L.empty;
+}
+
+// ── TRADUCTION MYMEMORY (GRATUIT) ──
+const transCache = {};
+async function translateFree(text){
+  if(!text || !text.trim()) return text;
+  const key = text.substring(0,40);
+  if(transCache[key]) return transCache[key];
+  try {
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text.substring(0,500))}&langpair=en|fr&de=novaris@contact.ca`;
+    const r = await fetch(url);
+    const d = await r.json();
+    const result = d?.responseData?.translatedText || text;
+    transCache[key] = result;
+    return result;
+  } catch(e) { return text; }
+}
+
+async function showTranslation(r, idx){
+  const el = document.getElementById('tbox-content-'+idx);
+  if(!el) return;
+  el.innerHTML = `<div class="tloading">${t('translating')}</div>`;
+  const fields = [
+    { key:'biggest_challenge', label: LANG==='fr'?'Défi principal':'Main challenge' },
+    { key:'primary_goal', label: LANG==='fr'?'Objectif':'Goal' },
+    { key:'lead_source', label: LANG==='fr'?'Sources de leads':'Lead sources' },
+    { key:'manual_task', label: LANG==='fr'?'Tâches manuelles':'Manual tasks' },
+    { key:'additional_notes', label: LANG==='fr'?'Notes':'Notes' }
+  ].filter(f => r[f.key] && r[f.key].trim());
+  
+  const results = await Promise.all(fields.map(async f => {
+    const translated = await translateFree(r[f.key]);
+    return { label: f.label, original: r[f.key], translated };
+  }));
+  
+  el.innerHTML = results.map(res => `
+    <div class="tbox-section">
+      <div class="ts-label">${res.label}</div>
+      <div class="ts-val">${LANG==='fr' ? res.translated : res.original}</div>
+    </div>`).join('') || `<span style="color:var(--muted);font-size:.78rem">${LANG==='fr'?'Aucun texte libre à traduire':'No free text to translate'}</span>`;
+}
+
+// ── DONNÉES ──
+let allData = [];
+const BUDGET_VAL = {'Under $2,000':1500,'$2,000 – $3,500':2750,'$3,500 – $6,000':4750,'$6,000 – $10,000':8000,'Monthly payments preferred':3000};
+
+async function loadAll(){
+  const { data } = await sb.from('survey_responses').select('*').order('submitted_at',{ascending:false});
+  allData = data || [];
+  updateMetrics();
+  renderList();
+}
+
+// ── REALTIME ──
+sb.channel('novaris_survey')
+  .on('postgres_changes',{ event:'INSERT', schema:'public', table:'survey_responses' }, p => {
+    allData.unshift(p.new);
+    updateMetrics();
+    renderList();
+    showToast(`${t('toast_new')} ${p.new.contact_name||'—'} (${p.new.business_name||''})`);
+    document.getElementById('nb-new').textContent = allData.filter(r=>r.status==='new').length;
+  })
+  .subscribe(s => {
+    const b = document.getElementById('live-badge');
+    b.textContent = s==='SUBSCRIBED' ? T[LANG].live : T[LANG].connecting;
+    b.className = 'status-pill ' + (s==='SUBSCRIBED'?'sp-live':'sp-warn');
+  });
+
+function showToast(msg, dur=7000){
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), dur);
+}
+
+function updateMetrics(){
+  document.getElementById('m-total').textContent = allData.length;
+  document.getElementById('count-badge').textContent = allData.length;
+  const news = allData.filter(r=>r.status==='new').length;
+  document.getElementById('m-new').textContent = news;
+  document.getElementById('nb-new').textContent = news;
+  const total = allData.reduce((s,r)=>s+(BUDGET_VAL[r.budget]||2500),0);
+  document.getElementById('m-pipe').textContent = '$'+total.toLocaleString();
+  const bm={};
+  allData.forEach(r=>{ if(r.budget) bm[r.budget]=(bm[r.budget]||0)+1; });
+  const top = Object.entries(bm).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('m-budget').textContent = top ? top[0].split(' ')[0] : '—';
+}
+
+function getScore(r){
+  let s=0;
+  if(r.feat_chatbot==='Must have')s+=2;
+  if(r.feat_portal==='Must have')s+=2;
+  if(r.feat_payment==='Must have')s+=2;
+  if(r.feat_automation==='Must have')s+=1;
+  if(['$3,500 – $6,000','$6,000 – $10,000'].includes(r.budget))s+=2;
+  if(['ASAP (within 2 weeks)','Within 1 month'].includes(r.timeline))s+=1;
+  return Math.min(s,10);
+}
+
+function getStatusBadge(s){
+  const L = T[LANG];
+  const map = {new:`b-new`,reviewed:`b-seen`,proposal_sent:`b-proposal`,won:`b-won`};
+  const labels = {new:L.new, reviewed:L.seen, proposal_sent:L.proposal, won:L.won};
+  return `<span class="badge ${map[s]||'b-seen'}">${labels[s]||s}</span>`;
+}
+
+function renderList(){
+  const L = T[LANG];
+  const filter = document.getElementById('filter-status').value;
+  let data = allData;
+  if(filter) data = data.filter(r=>r.status===filter||(!r.status&&filter==='new'));
+  const list = document.getElementById('resp-list');
+  if(!data.length){ list.innerHTML=`<div class="empty-state">${L.empty}</div>`; return; }
+
+  list.innerHTML = data.map((r,i)=>{
+    const score = getScore(r);
+    const sc = score>=7?'var(--green)':score>=4?'var(--amber)':'var(--red)';
+    const sLabel = score>=7?L.score_hi:score>=4?L.score_mid:L.score_lo;
+    const scBadge = score>=7?'b-score-hi':score>=4?'b-score-mid':'b-score-lo';
+    const date = r.submitted_at?new Date(r.submitted_at).toLocaleString(LANG==='fr'?'fr-CA':'en-CA',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+    const initials = (r.contact_name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    const feats = ['chatbot','quote','portal','payment','automation','seo','booking','live_chat'].map(f=>{
+      const v = r['feat_'+f]; if(!v||v==='') return '';
+      const cls = v==='Must have'?'ft-must':v==='Nice to have'?'ft-nice':'ft-no';
+      const label = v==='Must have'?L.ft_must:v==='Nice to have'?L.ft_nice:L.ft_no;
+      return `<span class="ft ${cls}">${L.feat_names['feat_'+f]}: ${label}</span>`;
+    }).join('');
+
+    return `<div class="rrow" id="rrow-${i}">
+      <div class="rhead" onclick="toggleRow(${i})">
+        <div class="ravatar">${initials}</div>
+        <div>
+          <div class="rname">${r.contact_name||'—'} <span style="font-weight:400;color:var(--muted)">· ${r.business_name||'—'}</span></div>
+          <div class="rbiz">${r.city||''} · ${r.budget||'Budget non précisé'} · ${r.revenue_target_display||''}</div>
+        </div>
+        <div class="rmeta">
+          <span class="badge ${scBadge}">${score}/10</span>
+          ${getStatusBadge(r.status||'new')}
+          <span class="rdate">${date}</span>
+        </div>
+      </div>
+      <div class="rbody">
+        <div class="tbox">
+          <div class="tbox-head">
+            <span class="tbox-badge">MyMemory</span>
+            <span class="tbox-label">${L.translated}</span>
+            <span class="tbox-free">${L.free}</span>
+          </div>
+          <div class="tbox-content" id="tbox-content-${i}">
+            <button class="btn btn-outline btn-sm" onclick="showTranslation(allData[${i}],${i})">${L.translate_btn}</button>
+          </div>
+        </div>
+        <div class="det-section">
+          <div class="det-label" style="margin-bottom:5px">${L.score_label} — ${sLabel}</div>
+          <div class="score-row"><div class="score-track"><div class="score-fill" style="width:${score*10}%;background:${sc}"></div></div><span class="score-label" style="color:${sc}">${score}/10</span></div>
+        </div>
+        <div class="det-section">
+          <div class="det-label">${L.det_features.toUpperCase()}</div>
+          <div class="feat-wrap">${feats||`<span style="color:var(--muted);font-size:.73rem">—</span>`}</div>
+        </div>
+        <div class="det-section">
+          <div class="det-label">DETAILS</div>
+          <div class="det-grid">
+            <div class="det-item"><div class="dl">${L.det_email}</div><div class="dv">${r.email||'—'}</div></div>
+            <div class="det-item"><div class="dl">${L.det_phone}</div><div class="dv">${r.phone||'—'}</div></div>
+            <div class="det-item"><div class="dl">${L.det_team}</div><div class="dv">${r.team_size||'—'}</div></div>
+            <div class="det-item"><div class="dl">${L.det_years}</div><div class="dv">${r.years_in_business||'—'}</div></div>
+            <div class="det-item"><div class="dl">${L.det_mrr}</div><div class="dv">${r.current_mrr||'—'}</div></div>
+            <div class="det-item"><div class="dl">${L.det_target}</div><div class="dv">${r.revenue_target_display||'—'}</div></div>
+            <div class="det-item"><div class="dl">${L.det_timeline}</div><div class="dv">${r.timeline||'—'}</div></div>
+            <div class="det-item"><div class="dl">${L.det_phased}</div><div class="dv">${r.phased||'—'}</div></div>
+            <div class="det-item"><div class="dl">${L.det_quote}</div><div class="dv">${r.quote_method||'—'}</div></div>
+            <div class="det-item"><div class="dl">${L.det_response}</div><div class="dv">${r.response_time||'—'}</div></div>
+            <div class="det-item"><div class="dl">${L.det_website}</div><div class="dv">${r.has_website||'—'}</div></div>
+            <div class="det-item"><div class="dl">${L.det_assets}</div><div class="dv">${r.assets||'—'}</div></div>
+          </div>
+        </div>
+        <div class="act-row">
+          <button class="btn btn-brand btn-sm" onclick="markSeen('${r.id}',${i})">${L.mark_seen}</button>
+          <button class="btn btn-outline btn-sm" onclick="prefill(${i})">${L.create_quote}</button>
+          <select class="status-sel" onchange="updateStatus('${r.id}',this.value,${i});this.value=''">
+            <option value="">${L.change_status}</option>
+            <option value="new">${L.new}</option>
+            <option value="proposal_sent">${L.proposal}</option>
+            <option value="follow_up">Follow-up</option>
+            <option value="won">${L.won}</option>
+          </select>
+          <button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="deleteR('${r.id}',${i})">${L.delete}</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleRow(i){ document.getElementById('rrow-'+i).classList.toggle('expanded'); }
+
+async function markSeen(id,i){
+  await sb.from('survey_responses').update({status:'reviewed'}).eq('id',id);
+  allData[allData.findIndex(r=>r.id===id)].status='reviewed';
+  updateMetrics(); renderList();
+}
+async function updateStatus(id,status,i){
+  if(!status) return;
+  await sb.from('survey_responses').update({status}).eq('id',id);
+  allData[allData.findIndex(r=>r.id===id)].status=status;
+  updateMetrics(); renderList();
+  if(status!=='new') renderPipeline();
+}
+async function deleteR(id,i){
+  if(!confirm(LANG==='fr'?'Supprimer cette réponse ?':'Delete this response?')) return;
+  await sb.from('survey_responses').delete().eq('id',id);
+  allData = allData.filter(r=>r.id!==id);
+  updateMetrics(); renderList();
+}
+
+function prefill(i){
+  const r = allData[i];
+  document.getElementById('p-name').value = r.contact_name||'';
+  document.getElementById('p-biz').value = r.business_name||'';
+  const feats=[];
+  const L = T[LANG];
+  if(r.feat_chatbot==='Must have') feats.push(LANG==='fr'?'Chatbot IA (réponses 24/7)':'AI Chatbot (24/7 responses)');
+  if(r.feat_quote==='Must have') feats.push(LANG==='fr'?'Formulaire devis instantané':'Instant quote form');
+  if(r.feat_portal==='Must have') feats.push(LANG==='fr'?'Portail client':'Client portal');
+  if(r.feat_payment==='Must have') feats.push(LANG==='fr'?'Paiement en ligne (Stripe)':'Online payment (Stripe)');
+  if(r.feat_automation==='Must have') feats.push(LANG==='fr'?'Emails automatiques post-devis':'Automated follow-up emails');
+  if(r.feat_seo==='Must have') feats.push('SEO — GTA');
+  if(r.feat_booking==='Must have') feats.push(LANG==='fr'?'Réservation en ligne':'Online booking');
+  document.getElementById('p-feats').value = feats.join('\n');
+  document.getElementById('p-timeline').value = r.timeline||'';
+  showP('propose', document.querySelectorAll('.ni')[2]);
+}
+
+function genProposal(){
+  const L = T[LANG];
+  const name = document.getElementById('p-name').value||'[Client]';
+  const biz  = document.getElementById('p-biz').value||'[Business]';
+  const pkg  = document.getElementById('p-pkg').value;
+  const price = document.getElementById('p-price').value;
+  const feats = document.getElementById('p-feats').value.split('\n').filter(Boolean);
+  const timeline = document.getElementById('p-timeline').value||'2–4 sem.';
+  const monthly = document.getElementById('p-monthly').value;
+  const note = document.getElementById('p-note').value;
+  const pkgMap = {
+    essential:{n:LANG==='fr'?'Essentiel':'Essential',p:LANG==='fr'?'2 500 $':'$2,500'},
+    growth:{n:LANG==='fr'?'Croissance':'Growth',p:LANG==='fr'?'3 900 $':'$3,900'},
+    full:{n:LANG==='fr'?'Complet':'Full Suite',p:LANG==='fr'?'6 200 $':'$6,200'},
+    custom:{n:LANG==='fr'?'Personnalisé':'Custom',p:price||'TBD'}
+  };
+  const p = pkgMap[pkg];
+  const today = new Date().toLocaleDateString(LANG==='fr'?'fr-CA':'en-CA',{year:'numeric',month:'long',day:'numeric'});
+  const sep = '──────────────────────────────';
+  const text = LANG==='fr'
+    ? `${L.proposal_subject} ${biz}\n\n${L.proposal_hi} ${name},\n\n${L.proposal_thanks} ${biz}.\n\n${note?note+'\n\n':''}${sep}\nPROPOSITION — ${today}\nClient : ${name} / ${biz}\n${L.proposal_pkg} : ${p.n}\n${L.proposal_invest} : ${p.n === 'Personnalisé' ? price||'À définir' : p.p}${monthly?'\n'+L.proposal_monthly_opt+' : '+monthly:''}\n${L.proposal_delay} : ${timeline}\n\n${L.proposal_features} :\n${feats.map(f=>'  ✓ '+f).join('\n')}\n  ✓ ${L.proposal_support}\n  ✓ ${L.proposal_revision}\n  ✓ ${L.proposal_ownership}\n${sep}\n\n${L.proposal_why} :\n${feats.length?'Vos priorités ('+feats.slice(0,2).join(', ')+') sont entièrement couvertes.':''}\n\nNovaris Technologies accompagne ${biz} sur le long terme — pas seulement pour ce projet.\n\n${L.proposal_steps} :\n1. ${L.proposal_s1}\n2. ${L.proposal_s2}\n3. ${L.proposal_s3}\n\n${L.proposal_closing}\n\nPatrick Essono\n${L.proposal_title}\nNovaris Technologies Inc.\np_essono@hotmail.com`
+    : `${L.proposal_subject} ${biz}\n\nHi ${name},\n\n${L.proposal_thanks} ${biz}.\n\n${note?note+'\n\n':''}${sep}\nPROPOSAL — ${today}\nClient: ${name} / ${biz}\n${L.proposal_pkg}: ${p.n}\n${L.proposal_invest}: ${p.p}${monthly?'\n'+L.proposal_monthly_opt+': '+monthly:''}\n${L.proposal_delay}: ${timeline}\n\n${L.proposal_features}:\n${feats.map(f=>'  ✓ '+f).join('\n')}\n  ✓ ${L.proposal_support}\n  ✓ ${L.proposal_revision}\n  ✓ ${L.proposal_ownership}\n${sep}\n\n${L.proposal_why}:\n${feats.length?'Your priorities ('+feats.slice(0,2).join(', ')+') are fully covered.':''}\n\nNovaris Technologies is your long-term partner — not just for this project.\n\n${L.proposal_steps}:\n1. ${L.proposal_s1}\n2. ${L.proposal_s2}\n3. ${L.proposal_s3}\n\n${L.proposal_closing}\n\nPatrick Essono\n${L.proposal_title}\nNovaris Technologies Inc.\np_essono@hotmail.com`;
+  document.getElementById('prop-out').textContent = text;
+}
+
+function copyProp(){
+  const txt = document.getElementById('prop-out').textContent;
+  navigator.clipboard.writeText(txt).then(()=>showToast(LANG==='fr'?'Copié dans le presse-papier !':'Copied to clipboard!', 2500));
+}
+
+function renderPipeline(){
+  const L = T[LANG];
+  ['new','proposal','followup','won'].forEach(stage=>{
+    const col = document.getElementById('pipe-'+stage);
+    const sMap = {new:'new',proposal:'proposal_sent',followup:'follow_up',won:'won'};
+    const items = allData.filter(r=>(r.status||'new')===sMap[stage]);
+    col.innerHTML = items.length
+      ? items.map(r=>`<div class="pipe-card"><div class="pc-name">${r.contact_name||'—'}</div><div class="pc-biz">${r.business_name||'—'}</div><div class="pc-val">~$${(BUDGET_VAL[r.budget]||2500).toLocaleString()}</div></div>`).join('')
+      : `<div class="pipe-empty">—</div>`;
+  });
+}
+
+function renderInsights(){
+  const r = allData; if(!r.length) return;
+  const L = T[LANG];
+  const featKeys=['feat_chatbot','feat_quote','feat_portal','feat_payment','feat_automation','feat_seo','feat_booking'];
+  const fc={};
+  featKeys.forEach(k=>{fc[k]=r.filter(x=>x[k]==='Must have').length});
+  const sf=Object.entries(fc).sort((a,b)=>b[1]-a[1]).filter(([,v])=>v>0);
+  const mf=sf[0]?.[1]||1;
+  document.getElementById('feat-chart').innerHTML = sf.length
+    ? sf.map(([k,v])=>`<div class="bar-item"><div class="bar-lrow"><span class="bl">${L.feat_names[k]}</span><span>${v}/${r.length}</span></div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/mf*100)}%;background:var(--brand)"></div></div></div>`).join('')
+    : `<div class="empty-state" style="padding:10px;font-size:.78rem">—</div>`;
+  const bm={};r.forEach(x=>{if(x.budget)bm[x.budget]=(bm[x.budget]||0)+1});
+  const sb2=Object.entries(bm).sort((a,b)=>b[1]-a[1]);
+  const mb=sb2[0]?.[1]||1;
+  document.getElementById('budget-chart').innerHTML=sb2.map(([k,v])=>`<div class="bar-item"><div class="bar-lrow"><span class="bl">${k}</span><span>${v}</span></div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/mb*100)}%;background:var(--blue)"></div></div></div>`).join('');
+  const sources=r.flatMap(x=>x.lead_source?x.lead_source.split(', '):[]).filter(Boolean);
+  const sm={};sources.forEach(s=>{sm[s]=(sm[s]||0)+1});
+  const ss2=Object.entries(sm).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const ms=ss2[0]?.[1]||1;
+  document.getElementById('source-chart').innerHTML=ss2.map(([k,v])=>`<div class="bar-item"><div class="bar-lrow"><span class="bl">${k}</span><span>${v}</span></div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/ms*100)}%;background:var(--amber)"></div></div></div>`).join('');
+  const pains=r.flatMap(x=>x.manual_task?x.manual_task.split(', '):[]).filter(Boolean);
+  const pm={};pains.forEach(p=>{pm[p]=(pm[p]||0)+1});
+  const sp2=Object.entries(pm).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const mp=sp2[0]?.[1]||1;
+  document.getElementById('pain-chart').innerHTML=sp2.map(([k,v])=>`<div class="bar-item"><div class="bar-lrow"><span class="bl">${k}</span><span>${v}</span></div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/mp*100)}%;background:var(--red)"></div></div></div>`).join('');
+}
+
+const PANEL_TITLES = {reponses:0, pipeline:1, propose:2, insights:3};
+function showP(id, el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('panel-title').textContent = T[LANG].panels[id];
+  document.getElementById('panel-sub').textContent = id==='reponses'?'Shining Legacy — Danielle':'Novaris Technologies Inc.';
+  if(id==='insights'){renderInsights();}
+  if(id==='pipeline'){renderPipeline();}
+}
+
+// Init
+applyLang();
+loadAll();
+</script>
+</body>
+</html>
