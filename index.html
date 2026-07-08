@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Website Needs Assessment – Shining Legacy</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#5CB85C;--green-dark:#4A9B4A;--green-dim:rgba(92,184,92,0.10);
+  --blue:#29ABE2;--navy:#1A3A5C;
+  --white:#fff;--off:#F4F9F4;--text:#1A2A1A;--muted:#6B7B6B;
+  --border:#D4E8D4;--radius:12px;--shadow:0 4px 24px rgba(0,0,0,0.08);
+}
+body{font-family:'Inter',sans-serif;background:var(--off);color:var(--text);min-height:100vh}
+.hero{background:linear-gradient(135deg,var(--navy) 0%,#1E4470 100%);padding:48px 24px 36px;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(92,184,92,0.15);border:1px solid rgba(92,184,92,0.35);color:#7DD47D;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border-radius:100px;margin-bottom:16px}
+.hero h1{font-size:clamp(1.4rem,3.5vw,2rem);color:#fff;font-weight:700;margin-bottom:10px;line-height:1.25}
+.hero p{color:rgba(255,255,255,0.65);font-size:.875rem;max-width:500px;margin:0 auto;line-height:1.7}
+.hero-name{color:var(--green);font-weight:700}
+.progress-wrap{max-width:520px;margin:20px auto 0}
+.progress-bar{height:4px;background:rgba(255,255,255,0.15);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--green);border-radius:2px;transition:width .4s ease;width:0%}
+.progress-label{font-size:.7rem;color:rgba(255,255,255,0.4);text-align:right;margin-top:5px}
+.form-wrap{max-width:660px;margin:0 auto;padding:28px 16px 60px}
+.section-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:26px 24px 22px;margin-bottom:18px;box-shadow:var(--shadow)}
+.section-head{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.section-num{width:28px;height:28px;background:var(--green);color:#fff;border-radius:50%;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.section-title{font-size:.95rem;font-weight:600;color:var(--navy)}
+.section-sub{font-size:.75rem;color:var(--muted);margin-top:1px}
+.field{margin-bottom:16px}.field:last-child{margin-bottom:0}
+label{display:block;font-size:.8rem;font-weight:600;color:var(--navy);margin-bottom:5px}
+.req{color:var(--green)}
+input[type=text],input[type=email],input[type=tel],select,textarea{width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.85rem;color:var(--text);background:var(--white);outline:none;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(92,184,92,0.1)}
+textarea{resize:vertical;min-height:78px;line-height:1.6}
+select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 7L11 1' stroke='%236B7B6B' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:36px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.radio-group,.check-group{display:flex;flex-direction:column;gap:7px}
+.radio-item,.check-item{display:flex;align-items:flex-start;gap:10px;padding:9px 13px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;transition:all .18s}
+.radio-item:hover,.check-item:hover,.radio-item.sel,.check-item.sel{border-color:var(--green);background:var(--green-dim)}
+.radio-item input,.check-item input{margin-top:2px;accent-color:var(--green);flex-shrink:0}
+.rl{font-size:.84rem;font-weight:500;color:var(--text)}
+.rd{font-size:.73rem;color:var(--muted);margin-top:1px}
+.imp-table{width:100%}
+.imp-row{display:grid;grid-template-columns:1fr 160px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.imp-row:last-child{border-bottom:none}
+.imp-label{font-size:.83rem;color:var(--text)}
+.imp-sel{font-size:.78rem;padding:6px 10px}
+.range-row{display:flex;align-items:center;gap:12px;margin-top:4px}
+.range-row input[type=range]{flex:1;accent-color:var(--green)}
+.range-val{font-size:.88rem;font-weight:600;color:var(--green);min-width:90px;text-align:right}
+.hint{font-size:.72rem;color:var(--muted);margin-top:4px}
+.char-cnt{font-size:.7rem;color:var(--muted);text-align:right;margin-top:3px}
+.submit-wrap{text-align:center;margin-top:6px}
+.submit-btn{background:linear-gradient(135deg,var(--green),var(--green-dark));color:#fff;border:none;padding:14px 42px;border-radius:10px;font-family:'Inter',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;box-shadow:0 6px 24px rgba(92,184,92,0.35);transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(92,184,92,0.45)}
+.submit-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.submit-note{font-size:.72rem;color:var(--muted);margin-top:8px}
+.error-msg{background:#FEF2F2;border:1px solid #FCA5A5;color:#B91C1C;padding:10px 14px;border-radius:8px;font-size:.8rem;margin-top:10px;display:none}
+.success-wrap{display:none;text-align:center;padding:64px 24px;max-width:500px;margin:0 auto}
+.success-icon{width:70px;height:70px;background:var(--green-dim);border:2px solid var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.success-icon svg{color:var(--green)}
+.success-wrap h2{font-size:1.4rem;color:var(--navy);margin-bottom:10px;font-weight:700}
+.success-wrap p{color:var(--muted);font-size:.875rem;line-height:1.75}
+@media(max-width:580px){.grid-2{grid-template-columns:1fr}.imp-row{grid-template-columns:1fr;gap:5px}.imp-sel{width:100%}}
+</style>
+</head>
+<body>
+
+<script>
+  const SUPABASE_URL = 'https://aoeonvhohwgcjnvswlbt.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_259KgrJGFJIQnN4edkYGhw_e4gdyqq2';
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+</script>
+
+<div class="hero">
+  <div class="hero-badge">Website Needs Assessment</div>
+  <h1>Hi <span class="hero-name">Danielle</span>, let's build the perfect solution for Shining Legacy</h1>
+  <p>This short assessment helps us understand your goals so Patrick can prepare a detailed, personalized proposal — just for you.</p>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+    <div class="progress-label" id="prog-label">0% complete</div>
+  </div>
+</div>
+
+<div class="form-wrap">
+  <form id="sf" novalidate>
+
+  <!-- 1 -->
+  <div class="section-card">
+    <div class="section-head"><div class="section-num">1</div><div><div class="section-title">Your Business</div><div class="section-sub">Basic info to personalize your proposal</div></div></div>
+    <div class="grid-2">
+      <div class="field"><label>Business Name <span class="req">*</span></label><input type="text" name="business_name" placeholder="Shining Legacy Commercial Cleaning Inc" required></div>
+      <div class="field"><label>Your Full Name <span class="req">*</span></label><input type="text" name="contact_name" placeholder="Danielle" required></div>
+    </div>
+    <div class="grid-2">
+      <div class="field"><label>Email Address <span class="req">*</span></label><input type="email" name="email" placeholder="danielle@shininglegacy.ca" required></div>
+      <div class="field"><label>Phone Number</label><input type="tel" name="phone" placeholder="(437) 781-1769"></div>
+    </div>
+    <div class="grid-2">
+      <div class="field"><label>City / Region</label><input type="text" name="city" placeholder="e.g. Durham, GTA"></div>
+      <div class="field"><label>Years in Business</label>
+        <select name="years_in_business">
+          <option value="">Select...</option>
+          <option>Less than 1 year</option>
+          <option>1–2 years</option>
+          <option>3–5 years</option>
+          <option>5–10 years</option>
+          <option>10+ years</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Team Size</label>
+      <select name="team_size">
+        <option value="">Select...</option>
+        <option>Just me (solo)</option>
+        <option>2–5 people</option>
+        <option>6–10 people</option>
+        <option>11–25 people</option>
+        <option>25+ people</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="section-card">
+    <div class="section-head"><div class="section-num">2</div><div><div class="section-title">Current Situation</div><div class="section-sub">Where Shining Legacy is today</div></div></div>
+    <div class="field"><label>How do you currently get most clients? (check all that apply)</label>
+      <div class="check-group">
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="lead_source" value="Word of mouth / referrals"><div><div class="rl">Word of mouth / Referrals</div></div></div>
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="lead_source" value="Door to door / Cold outreach"><div><div class="rl">Door to door / Cold outreach</div></div></div>
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="lead_source" value="Google Search"><div><div class="rl">Google Search</div></div></div>
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="lead_source" value="Social media (Facebook, Instagram)"><div><div class="rl">Social media (Facebook / Instagram)</div></div></div>
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="lead_source" value="Online directories (Yelp, HomeStars)"><div><div class="rl">Online directories (Yelp, HomeStars…)</div></div></div>
+      </div>
+    </div>
+    <div class="field"><label>What types of clients do you currently serve?</label>
+      <div class="check-group">
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="client_type" value="Dental / Medical offices"><div><div class="rl">Dental / Medical offices</div></div></div>
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="client_type" value="Corporate offices"><div><div class="rl">Corporate offices</div></div></div>
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="client_type" value="Retail stores"><div><div class="rl">Retail stores</div></div></div>
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="client_type" value="Post-construction"><div><div class="rl">Post-construction (one-time)</div></div></div>
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="client_type" value="Warehouses / Industrial"><div><div class="rl">Warehouses / Industrial</div></div></div>
+      </div>
+    </div>
+    <div class="field"><label>Do you currently have a website?</label>
+      <div class="radio-group">
+        <div class="radio-item" onclick="tRadio(this,'has_website')"><input type="radio" name="has_website" value="Yes, but not generating leads"><div><div class="rl">Yes — but it's not generating leads</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'has_website')"><input type="radio" name="has_website" value="No website yet"><div><div class="rl">No website yet</div></div></div>
+      </div>
+    </div>
+    <div class="field"><label>Approximate current monthly recurring revenue</label>
+      <select name="current_mrr">
+        <option value="">Prefer not to say</option>
+        <option>Under $2,000 / month</option>
+        <option>$2,000 – $5,000 / month</option>
+        <option>$5,000 – $10,000 / month</option>
+        <option>$10,000 – $20,000 / month</option>
+        <option>$20,000+ / month</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="section-card">
+    <div class="section-head"><div class="section-num">3</div><div><div class="section-title">Your Goals</div><div class="section-sub">Where you want to take Shining Legacy</div></div></div>
+    <div class="field"><label>Primary goal for the next 12 months <span class="req">*</span></label>
+      <div class="radio-group">
+        <div class="radio-item" onclick="tRadio(this,'primary_goal')"><input type="radio" name="primary_goal" value="Get more leads online — less cold outreach"><div><div class="rl">Get more leads online — stop door-to-door</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'primary_goal')"><input type="radio" name="primary_goal" value="Sign larger corporate GTA contracts"><div><div class="rl">Sign larger corporate contracts in the GTA</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'primary_goal')"><input type="radio" name="primary_goal" value="Go full-time in my cleaning business"><div><div class="rl">Go full-time with Shining Legacy</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'primary_goal')"><input type="radio" name="primary_goal" value="All of the above"><div><div class="rl">All of the above</div></div></div>
+      </div>
+    </div>
+    <div class="field"><label>Target clients you most want to attract</label>
+      <div class="check-group">
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="target_client" value="Large corporate offices (GTA)"><div><div class="rl">Large corporate offices in the GTA</div></div></div>
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="target_client" value="Medical / healthcare facilities"><div><div class="rl">Medical / healthcare facilities</div></div></div>
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="target_client" value="Property management companies"><div><div class="rl">Property management companies</div></div></div>
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="target_client" value="Retail chains / franchise locations"><div><div class="rl">Retail chains / franchise locations</div></div></div>
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="target_client" value="Construction companies (post-build)"><div><div class="rl">Construction companies (post-build clean)</div></div></div>
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="target_client" value="Warehouses / distribution centers"><div><div class="rl">Warehouses / distribution centers</div></div></div>
+      </div>
+    </div>
+    <div class="field"><label>Target monthly revenue in 12 months</label>
+      <div class="range-row">
+        <input type="range" min="3000" max="50000" step="1000" value="10000" id="rev-range" oninput="updRev(this.value)">
+        <span class="range-val" id="rev-display">$10,000/mo</span>
+      </div>
+      <input type="hidden" name="revenue_target" id="rev-hidden" value="10000">
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="section-card">
+    <div class="section-head"><div class="section-num">4</div><div><div class="section-title">Website Features</div><div class="section-sub">Rate each feature by priority</div></div></div>
+    <div class="field"><label>For each feature, tell us how important it is <span class="req">*</span></label>
+      <div class="imp-table">
+        <div class="imp-row"><span class="imp-label">Instant online quote request form</span><select class="imp-sel" name="feat_quote"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
+        <div class="imp-row"><span class="imp-label">AI chatbot (answers questions 24/7)</span><select class="imp-sel" name="feat_chatbot"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
+        <div class="imp-row"><span class="imp-label">Live chat with real-time notifications</span><select class="imp-sel" name="feat_live_chat"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
+        <div class="imp-row"><span class="imp-label">Client portal (invoices, service history)</span><select class="imp-sel" name="feat_portal"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
+        <div class="imp-row"><span class="imp-label">Online payment (credit card / Stripe)</span><select class="imp-sel" name="feat_payment"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
+        <div class="imp-row"><span class="imp-label">Automated follow-up emails after quotes</span><select class="imp-sel" name="feat_automation"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
+        <div class="imp-row"><span class="imp-label">Online booking / scheduling</span><select class="imp-sel" name="feat_booking"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
+        <div class="imp-row"><span class="imp-label">SEO (appear on Google GTA searches)</span><select class="imp-sel" name="feat_seo"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="section-card">
+    <div class="section-head"><div class="section-num">5</div><div><div class="section-title">Operations & Automation</div><div class="section-sub">What's eating your time right now</div></div></div>
+    <div class="field"><label>Which tasks do you spend the most time on manually?</label>
+      <div class="check-group">
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="manual_task" value="Following up on quote requests"><div><div class="rl">Following up on quote requests</div></div></div>
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="manual_task" value="Sending invoices / chasing payments"><div><div class="rl">Sending invoices and chasing payments</div></div></div>
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="manual_task" value="Scheduling and coordinating team"><div><div class="rl">Scheduling and coordinating team</div></div></div>
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="manual_task" value="Answering the same questions repeatedly"><div><div class="rl">Answering the same questions repeatedly</div></div></div>
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="manual_task" value="Writing and sending contracts"><div><div class="rl">Writing and sending contracts</div></div></div>
+        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="manual_task" value="Tracking who owes money"><div><div class="rl">Tracking who owes money</div></div></div>
+      </div>
+    </div>
+    <div class="field"><label>How do you currently send quotes?</label>
+      <div class="radio-group">
+        <div class="radio-item" onclick="tRadio(this,'quote_method')"><input type="radio" name="quote_method" value="By phone call only"><div><div class="rl">By phone call only</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'quote_method')"><input type="radio" name="quote_method" value="By email (written manually)"><div><div class="rl">By email (written manually each time)</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'quote_method')"><input type="radio" name="quote_method" value="Text message"><div><div class="rl">Text message</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'quote_method')"><input type="radio" name="quote_method" value="In person"><div><div class="rl">In person only</div></div></div>
+      </div>
+    </div>
+    <div class="field"><label>How quickly do you typically respond to a new lead?</label>
+      <div class="radio-group">
+        <div class="radio-item" onclick="tRadio(this,'response_time')"><input type="radio" name="response_time" value="Within 1 hour"><div><div class="rl">Within 1 hour</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'response_time')"><input type="radio" name="response_time" value="Within 24 hours"><div><div class="rl">Within 24 hours</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'response_time')"><input type="radio" name="response_time" value="A few days"><div><div class="rl">A few days</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'response_time')"><input type="radio" name="response_time" value="Varies — hard to keep up"><div><div class="rl">Varies — hard to keep up</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="section-card">
+    <div class="section-head"><div class="section-num">6</div><div><div class="section-title">Budget & Timeline</div><div class="section-sub">Helps us scope the right proposal</div></div></div>
+    <div class="field"><label>Comfortable investment range for this project</label>
+      <div class="radio-group">
+        <div class="radio-item" onclick="tRadio(this,'budget')"><input type="radio" name="budget" value="Under $2,000"><div><div class="rl">Under $2,000</div><div class="rd">Basic website, essential features only</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'budget')"><input type="radio" name="budget" value="$2,000 – $3,500"><div><div class="rl">$2,000 – $3,500</div><div class="rd">Professional site + AI chatbot + SEO</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'budget')"><input type="radio" name="budget" value="$3,500 – $6,000"><div><div class="rl">$3,500 – $6,000</div><div class="rd">Full site + automation + client portal</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'budget')"><input type="radio" name="budget" value="$6,000 – $10,000"><div><div class="rl">$6,000 – $10,000</div><div class="rd">Custom dashboard + full automation suite</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'budget')"><input type="radio" name="budget" value="Monthly payments preferred"><div><div class="rl">I prefer monthly payments</div><div class="rd">Retainer / phased approach</div></div></div>
+      </div>
+    </div>
+    <div class="field"><label>Preferred launch timeline</label>
+      <div class="radio-group">
+        <div class="radio-item" onclick="tRadio(this,'timeline')"><input type="radio" name="timeline" value="ASAP (within 2 weeks)"><div><div class="rl">ASAP — within 2 weeks</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'timeline')"><input type="radio" name="timeline" value="Within 1 month"><div><div class="rl">Within 1 month</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'timeline')"><input type="radio" name="timeline" value="1–3 months"><div><div class="rl">1–3 months — planning ahead</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'timeline')"><input type="radio" name="timeline" value="No rush"><div><div class="rl">No specific deadline</div></div></div>
+      </div>
+    </div>
+    <div class="field"><label>Open to a phased approach?</label>
+      <div class="radio-group">
+        <div class="radio-item" onclick="tRadio(this,'phased')"><input type="radio" name="phased" value="Yes — start lean and grow"><div><div class="rl">Yes — start with essentials, grow over time</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'phased')"><input type="radio" name="phased" value="Prefer everything upfront"><div><div class="rl">I'd prefer everything built upfront</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'phased')"><input type="radio" name="phased" value="Open to discussion"><div><div class="rl">Open to discussion</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7 -->
+  <div class="section-card">
+    <div class="section-head"><div class="section-num">7</div><div><div class="section-title">Final Questions</div><div class="section-sub">In your own words</div></div></div>
+    <div class="field">
+      <label>What is the biggest problem your website should solve?</label>
+      <textarea name="biggest_challenge" id="tc1" placeholder="e.g. People don't find me on Google, I lose leads because I can't respond fast enough..." oninput="cnt(this,'c1',300)" maxlength="300"></textarea>
+      <div class="char-cnt"><span id="c1">0</span>/300</div>
+    </div>
+    <div class="field">
+      <label>Is there a website or competitor you admire? (optional)</label>
+      <input type="text" name="inspiration_url" placeholder="https://...">
+      <div class="hint">Helps us understand the style and features you like.</div>
+    </div>
+    <div class="field"><label>Do you have your logo, photos, and brand materials ready?</label>
+      <div class="radio-group">
+        <div class="radio-item" onclick="tRadio(this,'assets')"><input type="radio" name="assets" value="Yes — logo, photos, colors ready"><div><div class="rl">Yes — everything ready</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'assets')"><input type="radio" name="assets" value="Some assets ready, need help with others"><div><div class="rl">Some assets ready, need help with the rest</div></div></div>
+        <div class="radio-item" onclick="tRadio(this,'assets')"><input type="radio" name="assets" value="Starting from scratch"><div><div class="rl">Starting from scratch</div></div></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Anything else you want Patrick to know?</label>
+      <textarea name="additional_notes" id="tc2" placeholder="Feel free to share any details, concerns, or specific requests..." oninput="cnt(this,'c2',400)" maxlength="400"></textarea>
+      <div class="char-cnt"><span id="c2">0</span>/400</div>
+    </div>
+  </div>
+
+  <div class="submit-wrap">
+    <button type="submit" class="submit-btn" id="submit-btn">
+      <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+      Submit My Assessment
+    </button>
+    <div class="error-msg" id="err-msg">Something went wrong. Please try again or email Patrick directly at p_essono@hotmail.com</div>
+    <div class="submit-note">Your answers are confidential and used only to prepare your proposal. Patrick will respond within 24 hours.</div>
+  </div>
+  </form>
+
+  <div class="success-wrap" id="success-wrap">
+    <div class="success-icon"><svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></div>
+    <h2>Thank you, Danielle!</h2>
+    <p>Your assessment has been submitted successfully.<br><br>Patrick will review your answers and send you a detailed, personalized proposal within <strong>24 hours</strong>.<br><br>Check your inbox at the email you provided.</p>
+  </div>
+</div>
+
+<script>
+function tCheck(el){
+  el.classList.toggle('sel');
+  el.querySelector('input[type=checkbox]').checked = !el.querySelector('input[type=checkbox]').checked;
+  updateProg();
+}
+function tRadio(el, name){
+  document.querySelectorAll(`input[name="${name}"]`).forEach(r=>{
+    r.parentElement.classList.remove('sel'); r.checked=false;
+  });
+  el.classList.add('sel');
+  el.querySelector('input[type=radio]').checked=true;
+  updateProg();
+}
+function updRev(v){
+  document.getElementById('rev-display').textContent='$'+Number(v).toLocaleString()+'/mo';
+  document.getElementById('rev-hidden').value=v;
+}
+function cnt(el,id,max){ document.getElementById(id).textContent=el.value.length; }
+function updateProg(){
+  const radios=document.querySelectorAll('input[type=radio]:checked').length;
+  const checks=document.querySelectorAll('input[type=checkbox]:checked').length;
+  const texts=[...document.querySelectorAll('input[type=text],input[type=email],textarea')].filter(e=>e.value.trim()).length;
+  const selects=[...document.querySelectorAll('select')].filter(s=>s.value).length;
+  const pct=Math.min(Math.round(((radios*3+checks*2+texts*3+selects*2)/60)*100),100);
+  document.getElementById('prog').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=pct+'% complete';
+}
+
+document.getElementById('sf').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const btn=document.getElementById('submit-btn');
+  const err=document.getElementById('err-msg');
+  btn.disabled=true;
+  btn.innerHTML='<svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Submitting...';
+  err.style.display='none';
+
+  const fd=new FormData(this);
+  const data={ submitted_at:new Date().toISOString(), client_name:'Danielle', status:'new' };
+  const multi={};
+
+  for(let [k,v] of fd.entries()){
+    if(['lead_source','client_type','target_client','manual_task'].includes(k)){
+      if(!multi[k]) multi[k]=[];
+      multi[k].push(v);
+    } else { data[k]=v; }
+  }
+  Object.entries(multi).forEach(([k,v])=>{ data[k]=v.join(', '); });
+  data.revenue_target_display='$'+Number(data.revenue_target||10000).toLocaleString()+'/month';
+
+  try {
+    const { error }=await sb.from('survey_responses').insert([data]);
+    if(error) throw error;
+    document.getElementById('sf').style.display='none';
+    document.getElementById('success-wrap').style.display='block';
+    window.scrollTo({top:0,behavior:'smooth'});
+  } catch(ex){
+    console.error(ex);
+    err.style.display='block';
+    btn.disabled=false;
+    btn.innerHTML='<svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg> Submit My Assessment';
+  }
+});
+
+document.querySelectorAll('input[type=text],input[type=email],input[type=tel],textarea').forEach(el=>el.addEventListener('input',updateProg));
+document.querySelectorAll('select').forEach(el=>el.addEventListener('change',updateProg));
+</script>
+</body>
+</html>
