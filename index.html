@@ -3,384 +3,664 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Website Needs Assessment – Shining Legacy</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Shining Legacy — Website Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --green:#5CB85C;--green-dark:#4A9B4A;--green-dim:rgba(92,184,92,0.10);
-  --blue:#29ABE2;--navy:#1A3A5C;
-  --white:#fff;--off:#F4F9F4;--text:#1A2A1A;--muted:#6B7B6B;
-  --border:#D4E8D4;--radius:12px;--shadow:0 4px 24px rgba(0,0,0,0.08);
+  --green:#5CB85C;--green-dk:#4A9B4A;
+  --green-bg:rgba(92,184,92,0.06);--green-bg2:rgba(92,184,92,0.12);
+  --navy:#1A3A5C;--navy2:#1E4470;
+  --bg:#F5F7FA;--surface:#fff;--surface2:#F8FAFC;
+  --t1:#111827;--t2:#374151;--t3:#6B7280;--t4:#9CA3AF;
+  --border:#E5E7EB;--border2:#D1D5DB;
+  --radius:10px;--shadow:0 1px 4px rgba(0,0,0,0.07);
+  --tr:0.15s ease;
 }
-body{font-family:'Inter',sans-serif;background:var(--off);color:var(--text);min-height:100vh}
-.hero{background:linear-gradient(135deg,var(--navy) 0%,#1E4470 100%);padding:48px 24px 36px;text-align:center}
-.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(92,184,92,0.15);border:1px solid rgba(92,184,92,0.35);color:#7DD47D;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border-radius:100px;margin-bottom:16px}
-.hero h1{font-size:clamp(1.4rem,3.5vw,2rem);color:#fff;font-weight:700;margin-bottom:10px;line-height:1.25}
-.hero p{color:rgba(255,255,255,0.65);font-size:.875rem;max-width:500px;margin:0 auto;line-height:1.7}
-.hero-name{color:var(--green);font-weight:700}
-.progress-wrap{max-width:520px;margin:20px auto 0}
-.progress-bar{height:4px;background:rgba(255,255,255,0.15);border-radius:2px;overflow:hidden}
-.progress-fill{height:100%;background:var(--green);border-radius:2px;transition:width .4s ease;width:0%}
-.progress-label{font-size:.7rem;color:rgba(255,255,255,0.4);text-align:right;margin-top:5px}
-.form-wrap{max-width:660px;margin:0 auto;padding:28px 16px 60px}
-.section-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:26px 24px 22px;margin-bottom:18px;box-shadow:var(--shadow)}
-.section-head{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)}
-.section-num{width:28px;height:28px;background:var(--green);color:#fff;border-radius:50%;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.section-title{font-size:.95rem;font-weight:600;color:var(--navy)}
-.section-sub{font-size:.75rem;color:var(--muted);margin-top:1px}
-.field{margin-bottom:16px}.field:last-child{margin-bottom:0}
-label{display:block;font-size:.8rem;font-weight:600;color:var(--navy);margin-bottom:5px}
+
+/* ── PROGRESS RAIL ── */
+#rail{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:300}
+#fill{height:100%;background:linear-gradient(90deg,var(--green),var(--green-dk));border-radius:0 2px 2px 0;transition:width .4s cubic-bezier(.4,0,.2,1)}
+
+/* ── NAV (sticky below rail) ── */
+nav{
+  position:sticky;top:3px;
+  background:rgba(255,255,255,.95);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  z-index:200;
+}
+.nav-in{
+  max-width:620px;margin:0 auto;
+  padding:0 18px;height:58px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.logo-icon{
+  width:34px;height:34px;background:var(--green);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.logo-icon svg{color:#fff;width:17px;height:17px}
+.logo-text{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;color:var(--navy);line-height:1.2}
+.logo-text span{display:block;font-size:.62rem;font-weight:500;color:var(--t3);font-family:'Inter',sans-serif}
+.nav-r{display:flex;align-items:center;gap:10px}
+.step-lbl{font-size:.75rem;font-weight:600;color:var(--t3);font-family:'Inter',sans-serif}
+.step-lbl b{color:var(--green)}
+.btn-rsec{
+  font-size:.72rem;font-weight:500;color:var(--t3);
+  background:none;border:1px solid var(--border);
+  padding:4px 10px;border-radius:6px;cursor:pointer;
+  display:flex;align-items:center;gap:4px;
+  transition:color var(--tr),border-color var(--tr);
+  font-family:'Inter',sans-serif;
+}
+.btn-rsec:hover{color:var(--t1);border-color:var(--border2)}
+.btn-rsec svg{width:11px;height:11px}
+
+/* ── BODY / WRAP ── */
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--t1);
+  font-size:15px;line-height:1.55;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:'Syne',sans-serif}
+.wrap{max-width:580px;margin:0 auto;padding:32px 18px 80px}
+
+/* ── STEP VISIBILITY ── */
+.step{display:none}
+.step.on{display:block;animation:fadeUp .25s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── STEP HEADER ── */
+.sec-eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:.68rem;font-weight:700;color:var(--green);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;
+}
+.sec-eyebrow::after{content:'';display:inline-block;width:32px;height:1px;background:rgba(92,184,92,.4)}
+.qt{font-size:1.2rem;font-weight:800;color:var(--navy);margin-bottom:5px;line-height:1.3;letter-spacing:-.3px}
+.qh{font-size:.83rem;color:var(--t3);margin-bottom:20px;line-height:1.6}
+
+/* ── OPTIONS ── */
+.opts{display:flex;flex-direction:column;gap:7px}
+.opt{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 14px;
+  background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);
+  cursor:pointer;transition:background var(--tr),border-color var(--tr);
+  user-select:none;
+}
+.opt:hover{background:var(--green-bg);border-color:var(--green)}
+.opt.sel{background:var(--green-bg);border-color:var(--green)}
+.opt input{position:absolute;opacity:0;width:0;height:0;pointer-events:none}
+.ind{
+  width:20px;height:20px;border-radius:50%;
+  border:2px solid var(--border2);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:background var(--tr),border-color var(--tr);
+  background:var(--surface);
+}
+.opt.sel .ind{background:var(--green);border-color:var(--green)}
+.ck{display:none;color:#fff}
+.opt.sel .ck{display:block}
+.cb{border-radius:4px}
+.opt-tx{font-size:.85rem;font-weight:500;color:var(--t2);line-height:1.4;flex:1}
+.opt.sel .opt-tx{color:var(--green);font-weight:600}
+.opt-desc{font-size:.72rem;color:var(--t3);margin-top:2px}
+.opt.sel .opt-desc{color:var(--green-dk)}
+
+/* ── FIELDS ── */
+.field{margin-bottom:13px}
+.field label{display:block;font-size:.75rem;font-weight:600;color:var(--navy);margin-bottom:5px}
 .req{color:var(--green)}
-input[type=text],input[type=email],input[type=tel],select,textarea{width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.85rem;color:var(--text);background:var(--white);outline:none;transition:border-color .2s}
-input:focus,select:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(92,184,92,0.1)}
-textarea{resize:vertical;min-height:78px;line-height:1.6}
-select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 7L11 1' stroke='%236B7B6B' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:36px}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.radio-group,.check-group{display:flex;flex-direction:column;gap:7px}
-.radio-item,.check-item{display:flex;align-items:flex-start;gap:10px;padding:9px 13px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;transition:all .18s}
-.radio-item:hover,.check-item:hover,.radio-item.sel,.check-item.sel{border-color:var(--green);background:var(--green-dim)}
-.radio-item input,.check-item input{margin-top:2px;accent-color:var(--green);flex-shrink:0}
-.rl{font-size:.84rem;font-weight:500;color:var(--text)}
-.rd{font-size:.73rem;color:var(--muted);margin-top:1px}
-.imp-table{width:100%}
-.imp-row{display:grid;grid-template-columns:1fr 160px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.fld{
+  width:100%;padding:9px 12px;
+  border:1.5px solid var(--border);border-radius:8px;
+  font-family:'Inter',sans-serif;font-size:.85rem;color:var(--t1);
+  background:var(--surface);outline:none;
+  transition:border-color var(--tr),box-shadow var(--tr);
+}
+.fld:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(92,184,92,.1)}
+.fld::placeholder{color:var(--t4)}
+select.fld{cursor:pointer;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg width='11' height='7' viewBox='0 0 11 7' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5.5 6L10 1' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 11px center;padding-right:32px}
+textarea.fld{resize:vertical;min-height:88px;line-height:1.6}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.hint{font-size:.7rem;color:var(--t3);margin-top:4px}
+.char-cnt{font-size:.68rem;color:var(--t4);text-align:right;margin-top:3px}
+
+/* ── IMPORTANCE TABLE ── */
+.imp{border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.imp-row{display:grid;grid-template-columns:1fr 140px;gap:10px;align-items:center;padding:9px 13px;border-bottom:1px solid var(--border);background:var(--surface)}
 .imp-row:last-child{border-bottom:none}
-.imp-label{font-size:.83rem;color:var(--text)}
-.imp-sel{font-size:.78rem;padding:6px 10px}
-.range-row{display:flex;align-items:center;gap:12px;margin-top:4px}
-.range-row input[type=range]{flex:1;accent-color:var(--green)}
-.range-val{font-size:.88rem;font-weight:600;color:var(--green);min-width:90px;text-align:right}
-.hint{font-size:.72rem;color:var(--muted);margin-top:4px}
-.char-cnt{font-size:.7rem;color:var(--muted);text-align:right;margin-top:3px}
-.submit-wrap{text-align:center;margin-top:6px}
-.submit-btn{background:linear-gradient(135deg,var(--green),var(--green-dark));color:#fff;border:none;padding:14px 42px;border-radius:10px;font-family:'Inter',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;box-shadow:0 6px 24px rgba(92,184,92,0.35);transition:all .2s;display:inline-flex;align-items:center;gap:8px}
-.submit-btn:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(92,184,92,0.45)}
-.submit-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
-.submit-note{font-size:.72rem;color:var(--muted);margin-top:8px}
-.error-msg{background:#FEF2F2;border:1px solid #FCA5A5;color:#B91C1C;padding:10px 14px;border-radius:8px;font-size:.8rem;margin-top:10px;display:none}
-.success-wrap{display:none;text-align:center;padding:64px 24px;max-width:500px;margin:0 auto}
-.success-icon{width:70px;height:70px;background:var(--green-dim);border:2px solid var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
-.success-icon svg{color:var(--green)}
-.success-wrap h2{font-size:1.4rem;color:var(--navy);margin-bottom:10px;font-weight:700}
-.success-wrap p{color:var(--muted);font-size:.875rem;line-height:1.75}
-@media(max-width:580px){.grid-2{grid-template-columns:1fr}.imp-row{grid-template-columns:1fr;gap:5px}.imp-sel{width:100%}}
+.imp-row:nth-child(even){background:var(--surface2)}
+.imp-lbl{font-size:.82rem;color:var(--t1)}
+.imp-sel{
+  font-size:.75rem;padding:5px 8px;
+  border:1px solid var(--border);border-radius:6px;
+  background:var(--surface);color:var(--t1);
+  font-family:'Inter',sans-serif;cursor:pointer;outline:none;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg width='9' height='6' viewBox='0 0 9 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L4.5 5L8 1' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 7px center;padding-right:22px;width:100%;
+}
+.imp-sel:focus{border-color:var(--green)}
+
+/* ── RANGE ── */
+.range-wrap{margin-top:6px}
+.range-row{display:flex;align-items:center;gap:14px}
+.range-row input[type=range]{
+  flex:1;accent-color:var(--green);
+  height:5px;cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+  background:linear-gradient(to right,var(--green) 0%,var(--green) 50%,var(--border) 50%,var(--border) 100%);
+  border-radius:3px;
+}
+.range-val{font-size:.9rem;font-weight:700;color:var(--green);min-width:110px;text-align:right;font-family:'Syne',sans-serif}
+.range-labels{display:flex;justify-content:space-between;font-size:.68rem;color:var(--t3);margin-top:5px}
+
+/* ── BTNS ── */
+.btns{display:flex;gap:8px;margin-top:22px;align-items:center}
+.btn-next{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  background:var(--green);color:#fff;
+  border:none;padding:11px 28px;border-radius:8px;
+  font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;
+  cursor:pointer;flex:1;
+  box-shadow:0 4px 14px rgba(92,184,92,.25);
+  transition:background var(--tr),transform var(--tr);
+  min-height:46px;
+}
+.btn-next:hover{background:var(--green-dk);transform:translateY(-1px)}
+.btn-next:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-back{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  background:var(--surface);color:var(--t2);
+  border:1.5px solid var(--border);padding:11px 20px;border-radius:8px;
+  font-family:'Inter',sans-serif;font-size:.83rem;font-weight:600;
+  cursor:pointer;min-height:46px;
+  transition:background var(--tr),border-color var(--tr);
+}
+.btn-back:hover{background:var(--bg);border-color:var(--border2)}
+.btn-back:disabled{opacity:.3;cursor:not-allowed}
+
+/* ── DOTS ── */
+.dots{display:flex;gap:4px;justify-content:center;margin-top:16px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all .2s}
+.dot.on{background:var(--green);width:18px;border-radius:3px}
+.dot.done{background:rgba(92,184,92,.4)}
+
+/* ── ERROR ── */
+.em{display:none;align-items:center;gap:6px;font-size:.78rem;color:#B91C1C;
+  background:#FEF2F2;border:1px solid #FECACA;padding:9px 13px;border-radius:7px;margin-top:10px}
+.em.vis{display:flex}
+.em svg{width:14px;height:14px;flex-shrink:0}
+
+/* ── SUCCESS ── */
+.ty{display:none;text-align:center;padding:56px 0}
+.ty.vis{display:block}
+.ty-icon{width:66px;height:66px;background:#DCFCE7;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
+.ty-icon svg{color:#16A34A}
+.ty h2{font-size:1.5rem;color:var(--navy);margin-bottom:10px}
+.ty > p{font-size:.87rem;color:var(--t2);max-width:380px;margin:0 auto;line-height:1.75}
+.btn-restart{
+  display:inline-flex;align-items:center;gap:6px;
+  margin-top:22px;background:transparent;
+  border:1.5px solid var(--green);color:var(--green);
+  padding:9px 22px;border-radius:8px;
+  font-family:'Syne',sans-serif;font-size:.83rem;font-weight:700;
+  cursor:pointer;transition:background var(--tr);
+}
+.btn-restart:hover{background:var(--green-bg)}
+
+@media(max-width:520px){
+  .g2{grid-template-columns:1fr}
+  .imp-row{grid-template-columns:1fr;gap:4px}
+  .imp-sel{width:100%}
+  .btns{flex-direction:column}
+  .btn-next,.btn-back{width:100%}
+}
 </style>
 </head>
 <body>
 
 <script>
-  const SUPABASE_URL = 'https://aoeonvhohwgcjnvswlbt.supabase.co';
-  const SUPABASE_ANON_KEY = 'sb_publishable_259KgrJGFJIQnN4edkYGhw_e4gdyqq2';
-  const { createClient } = supabase;
-  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_URL = 'https://aoeonvhohwgcjnvswlbt.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_259KgrJGFJIQnN4edkYGhw_e4gdyqq2';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 </script>
 
-<div class="hero">
-  <div class="hero-badge">Website Needs Assessment</div>
-  <h1>Hi <span class="hero-name">Danielle</span>, let's build the perfect solution for Shining Legacy</h1>
-  <p>This short assessment helps us understand your goals so Patrick can prepare a detailed, personalized proposal — just for you.</p>
-  <div class="progress-wrap">
-    <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
-    <div class="progress-label" id="prog-label">0% complete</div>
-  </div>
-</div>
+<!-- RAIL -->
+<div id="rail"><div id="fill" style="width:11%"></div></div>
 
-<div class="form-wrap">
-  <form id="sf" novalidate>
-
-  <!-- 1 -->
-  <div class="section-card">
-    <div class="section-head"><div class="section-num">1</div><div><div class="section-title">Your Business</div><div class="section-sub">Basic info to personalize your proposal</div></div></div>
-    <div class="grid-2">
-      <div class="field"><label>Business Name <span class="req">*</span></label><input type="text" name="business_name" placeholder="Shining Legacy Commercial Cleaning Inc" required></div>
-      <div class="field"><label>Your Full Name <span class="req">*</span></label><input type="text" name="contact_name" placeholder="Danielle" required></div>
-    </div>
-    <div class="grid-2">
-      <div class="field"><label>Email Address <span class="req">*</span></label><input type="email" name="email" placeholder="danielle@shininglegacy.ca" required></div>
-      <div class="field"><label>Phone Number</label><input type="tel" name="phone" placeholder="(437) 781-1769"></div>
-    </div>
-    <div class="grid-2">
-      <div class="field"><label>City / Region</label><input type="text" name="city" placeholder="e.g. Durham, GTA"></div>
-      <div class="field"><label>Years in Business</label>
-        <select name="years_in_business">
-          <option value="">Select...</option>
-          <option>Less than 1 year</option>
-          <option>1–2 years</option>
-          <option>3–5 years</option>
-          <option>5–10 years</option>
-          <option>10+ years</option>
-        </select>
+<!-- NAV -->
+<nav>
+  <div class="nav-in">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l14 9-14 9V3z"/></svg>
       </div>
+      <div class="logo-text">Shining Legacy<span>Website Assessment</span></div>
     </div>
-    <div class="field"><label>Team Size</label>
-      <select name="team_size">
+    <div class="nav-r">
+      <span class="step-lbl"><b id="cur-n">1</b> / 9</span>
+      <button class="btn-rsec" onclick="resetStep()" title="Reset this section">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        Reset
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- CONTENT -->
+<div class="wrap">
+
+<!-- STEP 1 — Business info -->
+<div class="step on" id="s1">
+  <div class="sec-eyebrow">Getting started</div>
+  <div class="qt">Hi Danielle, let's build the perfect solution for Shining Legacy</div>
+  <div class="qh">This assessment takes about 5 minutes. Patrick will use your answers to prepare a detailed, personalized proposal within 24 hours.</div>
+  <div class="g2">
+    <div class="field"><label>Business Name <span class="req">*</span></label><input class="fld" id="f-business_name" type="text" placeholder="Your company name"></div>
+    <div class="field"><label>Your Full Name <span class="req">*</span></label><input class="fld" id="f-contact_name" type="text" placeholder="First and last name"></div>
+  </div>
+  <div class="g2">
+    <div class="field"><label>Email Address <span class="req">*</span></label><input class="fld" id="f-email" type="email" placeholder="yourname@company.com"></div>
+    <div class="field"><label>Phone Number</label><input class="fld" id="f-phone" type="tel" placeholder="(xxx) xxx-xxxx"></div>
+  </div>
+  <div class="g2">
+    <div class="field"><label>City / Region</label><input class="fld" id="f-city" type="text" placeholder="e.g. Durham, GTA"></div>
+    <div class="field"><label>Years in Business</label>
+      <select class="fld" id="f-years_in_business">
         <option value="">Select...</option>
-        <option>Just me (solo)</option>
-        <option>2–5 people</option>
-        <option>6–10 people</option>
-        <option>11–25 people</option>
-        <option>25+ people</option>
+        <option>Less than 1 year</option><option>1-2 years</option>
+        <option>3-5 years</option><option>5-10 years</option><option>10+ years</option>
       </select>
     </div>
   </div>
+  <div class="field"><label>Team Size</label>
+    <select class="fld" id="f-team_size">
+      <option value="">Select...</option>
+      <option>Just me (solo)</option><option>2-5 people</option>
+      <option>6-10 people</option><option>11-25 people</option><option>25+ people</option>
+    </select>
+  </div>
+  <div class="em" id="em1"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>Please fill in Business Name, Full Name and Email to continue.</div>
+  <div class="btns"><button class="btn-next" onclick="go(2)">Next <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button></div>
+  <div class="dots" id="dots1"></div>
+</div>
 
-  <!-- 2 -->
-  <div class="section-card">
-    <div class="section-head"><div class="section-num">2</div><div><div class="section-title">Current Situation</div><div class="section-sub">Where Shining Legacy is today</div></div></div>
-    <div class="field"><label>How do you currently get most clients? (check all that apply)</label>
-      <div class="check-group">
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="lead_source" value="Word of mouth / referrals"><div><div class="rl">Word of mouth / Referrals</div></div></div>
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="lead_source" value="Door to door / Cold outreach"><div><div class="rl">Door to door / Cold outreach</div></div></div>
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="lead_source" value="Google Search"><div><div class="rl">Google Search</div></div></div>
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="lead_source" value="Social media (Facebook, Instagram)"><div><div class="rl">Social media (Facebook / Instagram)</div></div></div>
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="lead_source" value="Online directories (Yelp, HomeStars)"><div><div class="rl">Online directories (Yelp, HomeStars…)</div></div></div>
-      </div>
+<!-- STEP 2 — Lead sources -->
+<div class="step" id="s2">
+  <div class="sec-eyebrow">Current situation</div>
+  <div class="qt">How do you currently get most of your clients?</div>
+  <div class="qh">Select all that apply.</div>
+  <div class="opts" data-f="lead_source" data-t="check">
+    <div class="opt" data-v="Word of mouth / Referrals"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Word of mouth / Referrals</span></div>
+    <div class="opt" data-v="Door to door / Cold outreach"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Door to door / Cold outreach</span></div>
+    <div class="opt" data-v="Google Search"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Google Search (organic or ads)</span></div>
+    <div class="opt" data-v="Social media (Facebook, Instagram)"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Social media (Facebook / Instagram)</span></div>
+    <div class="opt" data-v="Online directories"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Online directories (Yelp, HomeStars)</span></div>
+  </div>
+  <div class="btns"><button class="btn-back" onclick="go(1)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><button class="btn-next" onclick="go(3)">Next <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button></div>
+  <div class="dots" id="dots2"></div>
+</div>
+
+<!-- STEP 3 — Client types + website + MRR -->
+<div class="step" id="s3">
+  <div class="sec-eyebrow">Current situation</div>
+  <div class="qt">What types of clients do you currently serve?</div>
+  <div class="qh">Select all that apply.</div>
+  <div class="opts" data-f="client_type" data-t="check">
+    <div class="opt" data-v="Dental / Medical offices"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Dental / Medical offices</span></div>
+    <div class="opt" data-v="Corporate offices"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Corporate offices</span></div>
+    <div class="opt" data-v="Retail stores"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Retail stores</span></div>
+    <div class="opt" data-v="Post-construction"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Post-construction (one-time)</span></div>
+    <div class="opt" data-v="Warehouses / Industrial"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Warehouses / Industrial</span></div>
+  </div>
+  <div style="margin-top:18px">
+    <div class="qt" style="font-size:1rem;margin-bottom:5px">Do you currently have a website?</div>
+    <div class="opts" data-f="has_website" data-t="radio">
+      <div class="opt" data-v="Yes, but not generating leads"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Yes - but not generating leads</span></div>
+      <div class="opt" data-v="No website yet"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">No website yet</span></div>
     </div>
-    <div class="field"><label>What types of clients do you currently serve?</label>
-      <div class="check-group">
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="client_type" value="Dental / Medical offices"><div><div class="rl">Dental / Medical offices</div></div></div>
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="client_type" value="Corporate offices"><div><div class="rl">Corporate offices</div></div></div>
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="client_type" value="Retail stores"><div><div class="rl">Retail stores</div></div></div>
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="client_type" value="Post-construction"><div><div class="rl">Post-construction (one-time)</div></div></div>
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="client_type" value="Warehouses / Industrial"><div><div class="rl">Warehouses / Industrial</div></div></div>
-      </div>
-    </div>
-    <div class="field"><label>Do you currently have a website?</label>
-      <div class="radio-group">
-        <div class="radio-item" onclick="tRadio(this,'has_website')"><input type="radio" name="has_website" value="Yes, but not generating leads"><div><div class="rl">Yes — but it's not generating leads</div></div></div>
-        <div class="radio-item" onclick="tRadio(this,'has_website')"><input type="radio" name="has_website" value="No website yet"><div><div class="rl">No website yet</div></div></div>
-      </div>
-    </div>
+  </div>
+  <div style="margin-top:14px">
     <div class="field"><label>Approximate current monthly recurring revenue</label>
-      <select name="current_mrr">
+      <select class="fld" id="f-current_mrr">
         <option value="">Prefer not to say</option>
-        <option>Under $2,000 / month</option>
-        <option>$2,000 – $5,000 / month</option>
-        <option>$5,000 – $10,000 / month</option>
-        <option>$10,000 – $20,000 / month</option>
+        <option>Under $2,000 / month</option><option>$2,000 - $5,000 / month</option>
+        <option>$5,000 - $10,000 / month</option><option>$10,000 - $20,000 / month</option>
         <option>$20,000+ / month</option>
       </select>
     </div>
   </div>
-
-  <!-- 3 -->
-  <div class="section-card">
-    <div class="section-head"><div class="section-num">3</div><div><div class="section-title">Your Goals</div><div class="section-sub">Where you want to take Shining Legacy</div></div></div>
-    <div class="field"><label>Primary goal for the next 12 months <span class="req">*</span></label>
-      <div class="radio-group">
-        <div class="radio-item" onclick="tRadio(this,'primary_goal')"><input type="radio" name="primary_goal" value="Get more leads online — less cold outreach"><div><div class="rl">Get more leads online — stop door-to-door</div></div></div>
-        <div class="radio-item" onclick="tRadio(this,'primary_goal')"><input type="radio" name="primary_goal" value="Sign larger corporate GTA contracts"><div><div class="rl">Sign larger corporate contracts in the GTA</div></div></div>
-        <div class="radio-item" onclick="tRadio(this,'primary_goal')"><input type="radio" name="primary_goal" value="Go full-time in my cleaning business"><div><div class="rl">Go full-time with Shining Legacy</div></div></div>
-        <div class="radio-item" onclick="tRadio(this,'primary_goal')"><input type="radio" name="primary_goal" value="All of the above"><div><div class="rl">All of the above</div></div></div>
-      </div>
-    </div>
-    <div class="field"><label>Target clients you most want to attract</label>
-      <div class="check-group">
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="target_client" value="Large corporate offices (GTA)"><div><div class="rl">Large corporate offices in the GTA</div></div></div>
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="target_client" value="Medical / healthcare facilities"><div><div class="rl">Medical / healthcare facilities</div></div></div>
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="target_client" value="Property management companies"><div><div class="rl">Property management companies</div></div></div>
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="target_client" value="Retail chains / franchise locations"><div><div class="rl">Retail chains / franchise locations</div></div></div>
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="target_client" value="Construction companies (post-build)"><div><div class="rl">Construction companies (post-build clean)</div></div></div>
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="target_client" value="Warehouses / distribution centers"><div><div class="rl">Warehouses / distribution centers</div></div></div>
-      </div>
-    </div>
-    <div class="field"><label>Target monthly revenue in 12 months</label>
-      <div class="range-row">
-        <input type="range" min="3000" max="50000" step="1000" value="10000" id="rev-range" oninput="updRev(this.value)">
-        <span class="range-val" id="rev-display">$10,000/mo</span>
-      </div>
-      <input type="hidden" name="revenue_target" id="rev-hidden" value="10000">
-    </div>
-  </div>
-
-  <!-- 4 -->
-  <div class="section-card">
-    <div class="section-head"><div class="section-num">4</div><div><div class="section-title">Website Features</div><div class="section-sub">Rate each feature by priority</div></div></div>
-    <div class="field"><label>For each feature, tell us how important it is <span class="req">*</span></label>
-      <div class="imp-table">
-        <div class="imp-row"><span class="imp-label">Instant online quote request form</span><select class="imp-sel" name="feat_quote"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
-        <div class="imp-row"><span class="imp-label">AI chatbot (answers questions 24/7)</span><select class="imp-sel" name="feat_chatbot"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
-        <div class="imp-row"><span class="imp-label">Live chat with real-time notifications</span><select class="imp-sel" name="feat_live_chat"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
-        <div class="imp-row"><span class="imp-label">Client portal (invoices, service history)</span><select class="imp-sel" name="feat_portal"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
-        <div class="imp-row"><span class="imp-label">Online payment (credit card / Stripe)</span><select class="imp-sel" name="feat_payment"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
-        <div class="imp-row"><span class="imp-label">Automated follow-up emails after quotes</span><select class="imp-sel" name="feat_automation"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
-        <div class="imp-row"><span class="imp-label">Online booking / scheduling</span><select class="imp-sel" name="feat_booking"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
-        <div class="imp-row"><span class="imp-label">SEO (appear on Google GTA searches)</span><select class="imp-sel" name="feat_seo"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 5 -->
-  <div class="section-card">
-    <div class="section-head"><div class="section-num">5</div><div><div class="section-title">Operations & Automation</div><div class="section-sub">What's eating your time right now</div></div></div>
-    <div class="field"><label>Which tasks do you spend the most time on manually?</label>
-      <div class="check-group">
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="manual_task" value="Following up on quote requests"><div><div class="rl">Following up on quote requests</div></div></div>
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="manual_task" value="Sending invoices / chasing payments"><div><div class="rl">Sending invoices and chasing payments</div></div></div>
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="manual_task" value="Scheduling and coordinating team"><div><div class="rl">Scheduling and coordinating team</div></div></div>
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="manual_task" value="Answering the same questions repeatedly"><div><div class="rl">Answering the same questions repeatedly</div></div></div>
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="manual_task" value="Writing and sending contracts"><div><div class="rl">Writing and sending contracts</div></div></div>
-        <div class="check-item" onclick="tCheck(this)"><input type="checkbox" name="manual_task" value="Tracking who owes money"><div><div class="rl">Tracking who owes money</div></div></div>
-      </div>
-    </div>
-    <div class="field"><label>How do you currently send quotes?</label>
-      <div class="radio-group">
-        <div class="radio-item" onclick="tRadio(this,'quote_method')"><input type="radio" name="quote_method" value="By phone call only"><div><div class="rl">By phone call only</div></div></div>
-        <div class="radio-item" onclick="tRadio(this,'quote_method')"><input type="radio" name="quote_method" value="By email (written manually)"><div><div class="rl">By email (written manually each time)</div></div></div>
-        <div class="radio-item" onclick="tRadio(this,'quote_method')"><input type="radio" name="quote_method" value="Text message"><div><div class="rl">Text message</div></div></div>
-        <div class="radio-item" onclick="tRadio(this,'quote_method')"><input type="radio" name="quote_method" value="In person"><div><div class="rl">In person only</div></div></div>
-      </div>
-    </div>
-    <div class="field"><label>How quickly do you typically respond to a new lead?</label>
-      <div class="radio-group">
-        <div class="radio-item" onclick="tRadio(this,'response_time')"><input type="radio" name="response_time" value="Within 1 hour"><div><div class="rl">Within 1 hour</div></div></div>
-        <div class="radio-item" onclick="tRadio(this,'response_time')"><input type="radio" name="response_time" value="Within 24 hours"><div><div class="rl">Within 24 hours</div></div></div>
-        <div class="radio-item" onclick="tRadio(this,'response_time')"><input type="radio" name="response_time" value="A few days"><div><div class="rl">A few days</div></div></div>
-        <div class="radio-item" onclick="tRadio(this,'response_time')"><input type="radio" name="response_time" value="Varies — hard to keep up"><div><div class="rl">Varies — hard to keep up</div></div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 6 -->
-  <div class="section-card">
-    <div class="section-head"><div class="section-num">6</div><div><div class="section-title">Budget & Timeline</div><div class="section-sub">Helps us scope the right proposal</div></div></div>
-    <div class="field"><label>Comfortable investment range for this project</label>
-      <div class="radio-group">
-        <div class="radio-item" onclick="tRadio(this,'budget')"><input type="radio" name="budget" value="$2,500 – $3,500"><div><div class="rl">$2,500 – $3,500</div><div class="rd">Professional site + AI chatbot + SEO</div></div></div>
-        <div class="radio-item" onclick="tRadio(this,'budget')"><input type="radio" name="budget" value="$3,500 – $6,000"><div><div class="rl">$3,500 – $6,000</div><div class="rd">Full site + automation + client portal</div></div></div>
-        <div class="radio-item" onclick="tRadio(this,'budget')"><input type="radio" name="budget" value="$6,000 – $10,000"><div><div class="rl">$6,000 – $10,000</div><div class="rd">Custom dashboard + full automation suite</div></div></div>
-        <div class="radio-item" onclick="tRadio(this,'budget')"><input type="radio" name="budget" value="Monthly payments preferred"><div><div class="rl">I prefer monthly payments</div><div class="rd">Retainer / phased approach</div></div></div>
-      </div>
-    </div>
-    <div class="field"><label>Preferred launch timeline</label>
-      <div class="radio-group">
-        <div class="radio-item" onclick="tRadio(this,'timeline')"><input type="radio" name="timeline" value="ASAP (within 2 weeks)"><div><div class="rl">ASAP — within 2 weeks</div></div></div>
-        <div class="radio-item" onclick="tRadio(this,'timeline')"><input type="radio" name="timeline" value="Within 1 month"><div><div class="rl">Within 1 month</div></div></div>
-        <div class="radio-item" onclick="tRadio(this,'timeline')"><input type="radio" name="timeline" value="1–3 months"><div><div class="rl">1–3 months — planning ahead</div></div></div>
-        <div class="radio-item" onclick="tRadio(this,'timeline')"><input type="radio" name="timeline" value="No rush"><div><div class="rl">No specific deadline</div></div></div>
-      </div>
-    </div>
-    <div class="field"><label>Open to a phased approach?</label>
-      <div class="radio-group">
-        <div class="radio-item" onclick="tRadio(this,'phased')"><input type="radio" name="phased" value="Yes — start lean and grow"><div><div class="rl">Yes — start with essentials, grow over time</div></div></div>
-        <div class="radio-item" onclick="tRadio(this,'phased')"><input type="radio" name="phased" value="Prefer everything upfront"><div><div class="rl">I'd prefer everything built upfront</div></div></div>
-        <div class="radio-item" onclick="tRadio(this,'phased')"><input type="radio" name="phased" value="Open to discussion"><div><div class="rl">Open to discussion</div></div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 7 -->
-  <div class="section-card">
-    <div class="section-head"><div class="section-num">7</div><div><div class="section-title">Final Questions</div><div class="section-sub">In your own words</div></div></div>
-    <div class="field">
-      <label>What is the biggest problem your website should solve?</label>
-      <textarea name="biggest_challenge" id="tc1" placeholder="e.g. People don't find me on Google, I lose leads because I can't respond fast enough..." oninput="cnt(this,'c1',300)" maxlength="300"></textarea>
-      <div class="char-cnt"><span id="c1">0</span>/300</div>
-    </div>
-    <div class="field">
-      <label>Is there a website or competitor you admire? (optional)</label>
-      <input type="text" name="inspiration_url" placeholder="https://...">
-      <div class="hint">Helps us understand the style and features you like.</div>
-    </div>
-    <div class="field"><label>Do you have your logo, photos, and brand materials ready?</label>
-      <div class="radio-group">
-        <div class="radio-item" onclick="tRadio(this,'assets')"><input type="radio" name="assets" value="Yes — logo, photos, colors ready"><div><div class="rl">Yes — everything ready</div></div></div>
-        <div class="radio-item" onclick="tRadio(this,'assets')"><input type="radio" name="assets" value="Some assets ready, need help with others"><div><div class="rl">Some assets ready, need help with the rest</div></div></div>
-        <div class="radio-item" onclick="tRadio(this,'assets')"><input type="radio" name="assets" value="Starting from scratch"><div><div class="rl">Starting from scratch</div></div></div>
-      </div>
-    </div>
-    <div class="field">
-      <label>Anything else you want Patrick to know?</label>
-      <textarea name="additional_notes" id="tc2" placeholder="Feel free to share any details, concerns, or specific requests..." oninput="cnt(this,'c2',400)" maxlength="400"></textarea>
-      <div class="char-cnt"><span id="c2">0</span>/400</div>
-    </div>
-  </div>
-
-  <div class="submit-wrap">
-    <button type="submit" class="submit-btn" id="submit-btn">
-      <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-      Submit My Assessment
-    </button>
-    <div class="error-msg" id="err-msg">Something went wrong. Please try again or email Patrick directly at p_essono@hotmail.com</div>
-    <div class="submit-note">Your answers are confidential and used only to prepare your proposal. Patrick will respond within 24 hours.</div>
-  </div>
-  </form>
-
-  <div class="success-wrap" id="success-wrap">
-    <div class="success-icon"><svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></div>
-    <h2>Thank you, Danielle!</h2>
-    <p>Your assessment has been submitted successfully.<br><br>Patrick will review your answers and send you a detailed, personalized proposal within <strong>24 hours</strong>.<br><br>Check your inbox at the email you provided.</p>
-  </div>
+  <div class="btns"><button class="btn-back" onclick="go(2)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><button class="btn-next" onclick="go(4)">Next <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button></div>
+  <div class="dots" id="dots3"></div>
 </div>
 
+<!-- STEP 4 — Goals -->
+<div class="step" id="s4">
+  <div class="sec-eyebrow">Your goals</div>
+  <div class="qt">What is your primary goal for the next 12 months?</div>
+  <div class="qh">Choose one.</div>
+  <div class="opts" data-f="primary_goal" data-t="radio">
+    <div class="opt" data-v="Get more leads online"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Get more leads online - stop door to door</span></div>
+    <div class="opt" data-v="Sign larger corporate GTA contracts"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Sign larger corporate contracts in the GTA</span></div>
+    <div class="opt" data-v="Go full-time with Shining Legacy"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Go full-time with Shining Legacy</span></div>
+    <div class="opt" data-v="All of the above"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">All of the above</span></div>
+  </div>
+  <div style="margin-top:18px">
+    <div class="qt" style="font-size:1rem;margin-bottom:5px">Target clients you most want to attract</div>
+    <div class="qh" style="margin-bottom:10px">Select all that apply.</div>
+    <div class="opts" data-f="target_client" data-t="check">
+      <div class="opt" data-v="Large corporate offices (GTA)"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Large corporate offices in the GTA</span></div>
+      <div class="opt" data-v="Medical / healthcare facilities"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Medical / healthcare facilities</span></div>
+      <div class="opt" data-v="Property management companies"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Property management companies</span></div>
+      <div class="opt" data-v="Retail chains"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Retail chains / franchise locations</span></div>
+      <div class="opt" data-v="Construction companies"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Construction companies (post-build)</span></div>
+      <div class="opt" data-v="Warehouses / distribution centers"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Warehouses / distribution centers</span></div>
+    </div>
+  </div>
+  <div class="btns"><button class="btn-back" onclick="go(3)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><button class="btn-next" onclick="go(5)">Next <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button></div>
+  <div class="dots" id="dots4"></div>
+</div>
+
+<!-- STEP 5 — Revenue target -->
+<div class="step" id="s5">
+  <div class="sec-eyebrow">Your goals</div>
+  <div class="qt">What is your target monthly revenue in 12 months?</div>
+  <div class="qh">Drag the slider to set your goal.</div>
+  <div class="range-wrap">
+    <div class="range-row">
+      <input type="range" id="rev-slider" min="3000" max="50000" step="1000" value="10000" oninput="updRev(this.value)">
+      <span class="range-val" id="rev-val">$10,000/mo</span>
+    </div>
+    <div class="range-labels"><span>$3,000</span><span>$50,000</span></div>
+  </div>
+  <div class="btns"><button class="btn-back" onclick="go(4)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><button class="btn-next" onclick="go(6)">Next <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button></div>
+  <div class="dots" id="dots5"></div>
+</div>
+
+<!-- STEP 6 — Features -->
+<div class="step" id="s6">
+  <div class="sec-eyebrow">Website features</div>
+  <div class="qt">Rate each feature by priority level</div>
+  <div class="qh">Select Must have, Nice to have, or Not needed for each.</div>
+  <div class="imp">
+    <div class="imp-row"><span class="imp-lbl">Instant online quote request form</span><select class="imp-sel" id="f-feat_quote" onchange="S.feat_quote=this.value"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
+    <div class="imp-row"><span class="imp-lbl">AI chatbot (answers 24/7)</span><select class="imp-sel" id="f-feat_chatbot" onchange="S.feat_chatbot=this.value"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
+    <div class="imp-row"><span class="imp-lbl">Live chat with real-time notifications</span><select class="imp-sel" id="f-feat_live_chat" onchange="S.feat_live_chat=this.value"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
+    <div class="imp-row"><span class="imp-lbl">Client portal (invoices, history)</span><select class="imp-sel" id="f-feat_portal" onchange="S.feat_portal=this.value"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
+    <div class="imp-row"><span class="imp-lbl">Online payment (Stripe)</span><select class="imp-sel" id="f-feat_payment" onchange="S.feat_payment=this.value"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
+    <div class="imp-row"><span class="imp-lbl">Automated follow-up emails</span><select class="imp-sel" id="f-feat_automation" onchange="S.feat_automation=this.value"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
+    <div class="imp-row"><span class="imp-lbl">Online booking / scheduling</span><select class="imp-sel" id="f-feat_booking" onchange="S.feat_booking=this.value"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
+    <div class="imp-row"><span class="imp-lbl">SEO (Google GTA searches)</span><select class="imp-sel" id="f-feat_seo" onchange="S.feat_seo=this.value"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
+  </div>
+  <div class="btns"><button class="btn-back" onclick="go(5)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><button class="btn-next" onclick="go(7)">Next <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button></div>
+  <div class="dots" id="dots6"></div>
+</div>
+
+<!-- STEP 7 — Operations -->
+<div class="step" id="s7">
+  <div class="sec-eyebrow">Operations</div>
+  <div class="qt">What tasks eat the most of your time right now?</div>
+  <div class="qh">Select all that apply.</div>
+  <div class="opts" data-f="manual_task" data-t="check">
+    <div class="opt" data-v="Following up on quote requests"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Following up on quote requests</span></div>
+    <div class="opt" data-v="Sending invoices / chasing payments"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Sending invoices and chasing payments</span></div>
+    <div class="opt" data-v="Scheduling and coordinating team"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Scheduling and coordinating team</span></div>
+    <div class="opt" data-v="Answering the same questions repeatedly"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Answering the same questions repeatedly</span></div>
+    <div class="opt" data-v="Writing and sending contracts"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Writing and sending contracts</span></div>
+    <div class="opt" data-v="Tracking who owes money"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Tracking who owes money</span></div>
+  </div>
+  <div style="margin-top:18px">
+    <div class="qt" style="font-size:1rem;margin-bottom:5px">How do you currently send quotes?</div>
+    <div class="opts" data-f="quote_method" data-t="radio">
+      <div class="opt" data-v="By phone call only"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">By phone call only</span></div>
+      <div class="opt" data-v="By email (written manually)"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">By email (written manually each time)</span></div>
+      <div class="opt" data-v="Text message"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Text message</span></div>
+      <div class="opt" data-v="In person"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">In person only</span></div>
+    </div>
+  </div>
+  <div style="margin-top:14px">
+    <div class="qt" style="font-size:1rem;margin-bottom:5px">How quickly do you respond to a new lead?</div>
+    <div class="opts" data-f="response_time" data-t="radio">
+      <div class="opt" data-v="Within 1 hour"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Within 1 hour</span></div>
+      <div class="opt" data-v="Within 24 hours"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Within 24 hours</span></div>
+      <div class="opt" data-v="A few days"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">A few days</span></div>
+      <div class="opt" data-v="Varies - hard to keep up"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Varies - hard to keep up</span></div>
+    </div>
+  </div>
+  <div class="btns"><button class="btn-back" onclick="go(6)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><button class="btn-next" onclick="go(8)">Next <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button></div>
+  <div class="dots" id="dots7"></div>
+</div>
+
+<!-- STEP 8 — Budget -->
+<div class="step" id="s8">
+  <div class="sec-eyebrow">Budget and timeline</div>
+  <div class="qt">What investment range are you comfortable with?</div>
+  <div class="qh">Choose one.</div>
+  <div class="opts" data-f="budget" data-t="radio">
+    <div class="opt" data-v="$2,500 - $3,500"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><div><div class="opt-tx">$2,500 - $3,500</div><div class="opt-desc">Professional site + AI chatbot + SEO</div></div></div>
+    <div class="opt" data-v="$3,500 - $6,000"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><div><div class="opt-tx">$3,500 - $6,000</div><div class="opt-desc">Full site + automation + client portal</div></div></div>
+    <div class="opt" data-v="$6,000 - $10,000"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><div><div class="opt-tx">$6,000 - $10,000</div><div class="opt-desc">Custom dashboard + full automation suite</div></div></div>
+    <div class="opt" data-v="Monthly payments preferred"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><div><div class="opt-tx">I prefer monthly payments</div><div class="opt-desc">Retainer / phased approach</div></div></div>
+  </div>
+  <div style="margin-top:18px">
+    <div class="qt" style="font-size:1rem;margin-bottom:5px">Preferred launch timeline</div>
+    <div class="opts" data-f="timeline" data-t="radio">
+      <div class="opt" data-v="ASAP (within 2 weeks)"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">ASAP - within 2 weeks</span></div>
+      <div class="opt" data-v="Within 1 month"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Within 1 month</span></div>
+      <div class="opt" data-v="1-3 months"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">1-3 months - planning ahead</span></div>
+      <div class="opt" data-v="No rush"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">No specific deadline</span></div>
+    </div>
+  </div>
+  <div style="margin-top:14px">
+    <div class="qt" style="font-size:1rem;margin-bottom:5px">Open to a phased approach?</div>
+    <div class="opts" data-f="phased" data-t="radio">
+      <div class="opt" data-v="Yes - start lean and grow"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Yes - start with essentials, grow over time</span></div>
+      <div class="opt" data-v="Prefer everything upfront"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Prefer everything built upfront</span></div>
+      <div class="opt" data-v="Open to discussion"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Open to discussion</span></div>
+    </div>
+  </div>
+  <div class="btns"><button class="btn-back" onclick="go(7)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><button class="btn-next" onclick="go(9)">Next <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button></div>
+  <div class="dots" id="dots8"></div>
+</div>
+
+<!-- STEP 9 — Final -->
+<div class="step" id="s9">
+  <div class="sec-eyebrow">Final questions</div>
+  <div class="qt">Last step - in your own words</div>
+  <div class="qh">Tell Patrick what matters most before he prepares your proposal.</div>
+  <div class="field">
+    <label>What is the biggest problem your website should solve?</label>
+    <textarea class="fld" id="f-biggest_challenge" maxlength="300" placeholder="Describe the main challenge - not enough leads, hard to respond fast, losing jobs to competitors..." oninput="S.biggest_challenge=this.value;document.getElementById('cnt1').textContent=this.value.length"></textarea>
+    <div class="char-cnt"><span id="cnt1">0</span>/300</div>
+  </div>
+  <div class="field">
+    <label>Is there a website you admire? (optional)</label>
+    <input class="fld" id="f-inspiration_url" type="text" placeholder="https://..." oninput="S.inspiration_url=this.value">
+    <div class="hint">Helps us understand the style and features you like.</div>
+  </div>
+  <div style="margin-top:4px">
+    <div class="qt" style="font-size:1rem;margin-bottom:5px">Do you have your logo, photos, and brand materials ready?</div>
+    <div class="opts" data-f="assets" data-t="radio">
+      <div class="opt" data-v="Yes - everything ready"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Yes - logo, photos, colors all ready</span></div>
+      <div class="opt" data-v="Some assets ready"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Some assets ready, need help with the rest</span></div>
+      <div class="opt" data-v="Starting from scratch"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Starting from scratch</span></div>
+    </div>
+  </div>
+  <div class="field" style="margin-top:14px">
+    <label>Anything else you want Patrick to know?</label>
+    <textarea class="fld" id="f-additional_notes" maxlength="400" placeholder="Feel free to share any details, concerns, or specific requests..." oninput="S.additional_notes=this.value;document.getElementById('cnt2').textContent=this.value.length"></textarea>
+    <div class="char-cnt"><span id="cnt2">0</span>/400</div>
+  </div>
+  <div class="em" id="em9"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>Something went wrong. Please try again or email Patrick directly.</div>
+  <div class="btns"><button class="btn-back" onclick="go(8)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><button class="btn-next" id="btn-submit" onclick="submit()"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg> Submit</button></div>
+  <div class="dots" id="dots9"></div>
+</div>
+
+<!-- SUCCESS -->
+<div class="ty" id="ty">
+  <div class="ty-icon"><svg width="30" height="30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+  <h2>Thank you, Danielle!</h2>
+  <p>Your assessment has been submitted. Patrick will review your answers and send you a detailed, personalized proposal within <strong>24 hours</strong>.</p>
+  <button class="btn-restart" onclick="restart()">
+    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+    Start Over
+  </button>
+</div>
+
+</div><!-- /wrap -->
+
 <script>
-function tCheck(el){
-  el.classList.toggle('sel');
-  el.querySelector('input[type=checkbox]').checked = !el.querySelector('input[type=checkbox]').checked;
-  updateProg();
+var TOTAL = 9;
+var cur = 1;
+var S = {
+  client_name:'Danielle', status:'new',
+  revenue_target:'10000', revenue_target_display:'$10,000/month',
+  biggest_challenge:'', additional_notes:'', inspiration_url:''
+};
+
+// ── BUILD DOTS ──
+for (var i = 1; i <= TOTAL; i++) {
+  var dc = document.getElementById('dots' + i);
+  if (!dc) continue;
+  var html = '';
+  for (var j = 1; j <= TOTAL; j++) {
+    html += '<div class="dot' + (j === i ? ' on' : '') + '" id="d' + i + '_' + j + '"></div>';
+  }
+  dc.innerHTML = html;
 }
-function tRadio(el, name){
-  document.querySelectorAll(`input[name="${name}"]`).forEach(r=>{
-    r.parentElement.classList.remove('sel'); r.checked=false;
+
+// ── WIRE OPT CLICKS ──
+document.querySelectorAll('.opts').forEach(function(group) {
+  var field = group.getAttribute('data-f');
+  var type  = group.getAttribute('data-t');
+  group.querySelectorAll('.opt').forEach(function(opt) {
+    opt.addEventListener('click', function() {
+      var val = this.getAttribute('data-v');
+      if (type === 'radio') {
+        group.querySelectorAll('.opt').forEach(function(o) { o.classList.remove('sel'); });
+        this.classList.add('sel');
+        S[field] = val;
+      } else {
+        this.classList.toggle('sel');
+        var vals = [];
+        group.querySelectorAll('.opt.sel').forEach(function(o) { vals.push(o.getAttribute('data-v')); });
+        S[field] = vals.join(', ');
+      }
+    });
   });
-  el.classList.add('sel');
-  el.querySelector('input[type=radio]').checked=true;
-  updateProg();
-}
-function updRev(v){
-  document.getElementById('rev-display').textContent='$'+Number(v).toLocaleString()+'/mo';
-  document.getElementById('rev-hidden').value=v;
-}
-function cnt(el,id,max){ document.getElementById(id).textContent=el.value.length; }
-function updateProg(){
-  const radios=document.querySelectorAll('input[type=radio]:checked').length;
-  const checks=document.querySelectorAll('input[type=checkbox]:checked').length;
-  const texts=[...document.querySelectorAll('input[type=text],input[type=email],textarea')].filter(e=>e.value.trim()).length;
-  const selects=[...document.querySelectorAll('select')].filter(s=>s.value).length;
-  const pct=Math.min(Math.round(((radios*3+checks*2+texts*3+selects*2)/60)*100),100);
-  document.getElementById('prog').style.width=pct+'%';
-  document.getElementById('prog-label').textContent=pct+'% complete';
-}
-
-document.getElementById('sf').addEventListener('submit', async function(e){
-  e.preventDefault();
-  const btn=document.getElementById('submit-btn');
-  const err=document.getElementById('err-msg');
-  btn.disabled=true;
-  btn.innerHTML='<svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Submitting...';
-  err.style.display='none';
-
-  const fd=new FormData(this);
-  const data={ submitted_at:new Date().toISOString(), client_name:'Danielle', status:'new' };
-  const multi={};
-
-  for(let [k,v] of fd.entries()){
-    if(['lead_source','client_type','target_client','manual_task'].includes(k)){
-      if(!multi[k]) multi[k]=[];
-      multi[k].push(v);
-    } else { data[k]=v; }
-  }
-  Object.entries(multi).forEach(([k,v])=>{ data[k]=v.join(', '); });
-  data.revenue_target_display='$'+Number(data.revenue_target||10000).toLocaleString()+'/month';
-
-  try {
-    const { error }=await sb.from('survey_responses').insert([data]);
-    if(error) throw error;
-    document.getElementById('sf').style.display='none';
-    document.getElementById('success-wrap').style.display='block';
-    window.scrollTo({top:0,behavior:'smooth'});
-  } catch(ex){
-    console.error(ex);
-    err.style.display='block';
-    btn.disabled=false;
-    btn.innerHTML='<svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg> Submit My Assessment';
-  }
 });
 
-document.querySelectorAll('input[type=text],input[type=email],input[type=tel],textarea').forEach(el=>el.addEventListener('input',updateProg));
-document.querySelectorAll('select').forEach(el=>el.addEventListener('change',updateProg));
+// ── WIRE TEXT INPUTS ──
+['business_name','contact_name','email','phone','city'].forEach(function(f) {
+  var el = document.getElementById('f-' + f);
+  if (el) el.addEventListener('input', function() { S[f] = this.value; });
+});
+['years_in_business','team_size','current_mrr'].forEach(function(f) {
+  var el = document.getElementById('f-' + f);
+  if (el) el.addEventListener('change', function() { S[f] = this.value; });
+});
+
+// ── RANGE ──
+function updRev(v) {
+  var n = Number(v);
+  document.getElementById('rev-val').textContent = '$' + n.toLocaleString() + '/mo';
+  S.revenue_target = String(n);
+  S.revenue_target_display = '$' + n.toLocaleString() + '/month';
+  // Update gradient
+  var pct = Math.round(((n - 3000) / (50000 - 3000)) * 100);
+  document.getElementById('rev-slider').style.background =
+    'linear-gradient(to right,var(--green) 0%,var(--green) ' + pct + '%,var(--border) ' + pct + '%,var(--border) 100%)';
+}
+
+// ── NAVIGATE ──
+function go(n) {
+  if (n === 2) {
+    var ok = S.business_name && S.contact_name && S.email;
+    document.getElementById('em1').className = 'em' + (ok ? '' : ' vis');
+    if (!ok) return;
+  }
+  document.getElementById('s' + cur).classList.remove('on');
+  cur = n;
+  document.getElementById('s' + cur).classList.add('on');
+  document.getElementById('cur-n').textContent = cur;
+  var pct = Math.round((cur / TOTAL) * 100);
+  document.getElementById('fill').style.width = pct + '%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── RESET STEP ──
+function resetStep() {
+  var step = document.getElementById('s' + cur);
+  step.querySelectorAll('.opt').forEach(function(o) { o.classList.remove('sel'); });
+  step.querySelectorAll('.fld').forEach(function(f) {
+    f.tagName === 'SELECT' ? (f.selectedIndex = 0) : (f.value = '');
+  });
+  step.querySelectorAll('[data-f]').forEach(function(g) {
+    var field = g.getAttribute('data-f');
+    if (field) S[field] = '';
+  });
+  if (cur === 5) {
+    document.getElementById('rev-slider').value = 10000;
+    updRev(10000);
+  }
+  ['cnt1','cnt2'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = '0';
+  });
+}
+
+// ── SUBMIT ──
+async function submit() {
+  var btn = document.getElementById('btn-submit');
+  var em  = document.getElementById('em9');
+  btn.disabled = true;
+  btn.innerHTML = 'Submitting...';
+  em.className = 'em';
+  S.submitted_at = new Date().toISOString();
+  try {
+    var res = await sb.from('survey_responses').insert([S]);
+    if (res.error) throw res.error;
+    document.getElementById('s' + cur).classList.remove('on');
+    document.getElementById('ty').className = 'ty vis';
+    document.getElementById('fill').style.width = '100%';
+    document.getElementById('cur-n').textContent = TOTAL;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch(ex) {
+    console.error(ex);
+    em.className = 'em vis';
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg> Submit';
+  }
+}
+
+// ── RESTART ──
+function restart() {
+  S = { client_name:'Danielle', status:'new', revenue_target:'10000', revenue_target_display:'$10,000/month', biggest_challenge:'', additional_notes:'', inspiration_url:'' };
+  document.querySelectorAll('.opt').forEach(function(o) { o.classList.remove('sel'); });
+  document.querySelectorAll('.fld').forEach(function(f) {
+    f.tagName === 'SELECT' ? (f.selectedIndex = 0) : (f.value = '');
+  });
+  document.getElementById('rev-slider').value = 10000;
+  updRev(10000);
+  ['cnt1','cnt2'].forEach(function(id) { var el = document.getElementById(id); if (el) el.textContent = '0'; });
+  document.getElementById('ty').className = 'ty';
+  cur = 1;
+  document.getElementById('s1').classList.add('on');
+  document.getElementById('cur-n').textContent = '1';
+  document.getElementById('fill').style.width = '11%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 </script>
 </body>
 </html>
