@@ -1149,8 +1149,8 @@ const EXTRA_I18N = {
   'imeth-a':{fr:'Autre',en:'Other'},
   'il-details':{fr:'Coordonnées de paiement (courriel Interac, infos virement, etc.)',en:'Payment details (Interac email, bank info, etc.)'},
   'il-notes':{fr:"Notes internes (n'apparaissent pas sur le PDF)",en:'Internal notes (not shown on the PDF)'},
-  'ic-sub':{fr:'Sous-total',en:'Subtotal'},
-  'ic-tax':{fr:'Taxes',en:'Tax'},
+  'ic-sub':{fr:'Montant total',en:'Total amount'},
+  'ic-tax':{fr:'Montant par versement',en:'Amount per installment'},
   'ic-total':{fr:'Total',en:'Total'},
   'ib-preview':{fr:'Aperçu PDF',en:'Preview PDF'},
   'ib-download':{fr:'Télécharger',en:'Download'},
@@ -1302,13 +1302,13 @@ function onMethodChange(){
 
 function recalcInvoice(){
   const amount = parseFloat(document.getElementById('inv-amount').value)||0;
-  const rate = appSettings.tax_rate||0;
-  const tax = +(amount*rate/100).toFixed(2);
-  const total = +(amount+tax).toFixed(2);
+  const freq = document.getElementById('inv-freq').value;
+  const count = freq==='unique' ? 1 : (parseInt(document.getElementById('inv-count').value)||1);
+  const monthly = freq==='unique' ? amount : +(amount/count).toFixed(2);
   document.getElementById('ic-sub-val').textContent = fmtMoney(amount);
-  document.getElementById('ic-tax-val').textContent = fmtMoney(tax) + ` (${rate}%)`;
-  document.getElementById('ic-total-val').textContent = fmtMoney(total);
-  return {amount, tax, total};
+  document.getElementById('ic-tax-val').textContent = freq==='unique' ? '—' : fmtMoney(monthly)+' × '+count;
+  document.getElementById('ic-total-val').textContent = fmtMoney(amount);
+  return {amount, tax:0, total:amount};
 }
 function fmtMoney(n){
   return (LANG==='fr' ? n.toLocaleString('fr-CA',{minimumFractionDigits:2,maximumFractionDigits:2})+' $' : '$'+n.toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2}));
@@ -1349,7 +1349,8 @@ function buildInvoiceObject(){
       const docL = document.getElementById('inv-lang').value;
       return f ? (docL==='fr'?f.fr:f.en) : k;
     }),
-    amount, tax_rate: appSettings.tax_rate||0, tax_amount: tax, total_amount: total,
+    amount, tax_rate:0, tax_amount:0, total_amount: amount,
+    first_installment_date: document.getElementById('inv-start').value || null,
     payment_method: document.getElementById('inv-method').value,
     payment_details: document.getElementById('inv-details').value,
     frequency: freq,
@@ -1365,15 +1366,17 @@ function invoiceHTMLDoc(inv){
   const isFr = inv.lang==='fr';
   const L = isFr ? {
     facture:'FACTURE', num:'N° de facture', date:'Date', client:'Client', compagnie:'Compagnie',
-    details:'DÉTAIL DU FORFAIT', desc:'Description', montant:'Montant', sousTotal:'Sous-total',
-    taxes:'Taxes', total:'Total', paiement:'MODALITÉS DE PAIEMENT', methode:'Type de paiement',
+    details:'DÉTAIL DU FORFAIT', desc:'Description', montant:'Montant total',
+    total:'Total', paiement:'MODALITÉS DE PAIEMENT', methode:'Type de paiement',
     coord:'Coordonnées', freq:'Fréquence', echeance:"Date d'échéance", versements:'Nombre de versements',
+    versement_montant:'Montant par versement', premier_versement:'Date du 1er versement',
     merci: appSettings.invoice_footer_fr || 'Merci de votre confiance.'
   } : {
     facture:'INVOICE', num:'Invoice #', date:'Date', client:'Client', compagnie:'Company',
-    details:'PACKAGE DETAILS', desc:'Description', montant:'Amount', sousTotal:'Subtotal',
-    taxes:'Tax', total:'Total', paiement:'PAYMENT TERMS', methode:'Payment method',
+    details:'PACKAGE DETAILS', desc:'Description', montant:'Total amount',
+    total:'Total', paiement:'PAYMENT TERMS', methode:'Payment method',
     coord:'Details', freq:'Frequency', echeance:'Due date', versements:'Number of installments',
+    versement_montant:'Amount per installment', premier_versement:'First payment date',
     merci: appSettings.invoice_footer_en || 'Thank you for your business.'
   };
   const freqLabels = isFr
@@ -1445,11 +1448,17 @@ function generateInvoicePDF(inv){
 
   // Totaux
   const totalsX = 380;
+  const isRecurring = inv.frequency && inv.frequency !== 'unique';
+  const monthlyAmt = isRecurring && inv.installments_count > 1
+    ? +(inv.amount / inv.installments_count).toFixed(2)
+    : null;
   y += 16; doc.setFontSize(9.5); doc.setTextColor(...muted);
-  doc.text(L.sousTotal, totalsX, y); doc.text(fmtMoney2(inv.amount, inv.lang), 545, y, {align:'right'});
-  y += 16; doc.text(`${L.taxes} (${inv.tax_rate}%)`, totalsX, y); doc.text(fmtMoney2(inv.tax_amount, inv.lang), 545, y, {align:'right'});
-  y += 18; doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(...brand);
-  doc.text(L.total, totalsX, y); doc.text(fmtMoney2(inv.total_amount, inv.lang), 545, y, {align:'right'});
+  if(isRecurring && monthlyAmt){
+    doc.text(L.versement_montant, totalsX, y); doc.text(fmtMoney2(monthlyAmt, inv.lang)+' × '+inv.installments_count, 545, y, {align:'right'});
+    y += 16;
+  }
+  y += 2; doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(...brand);
+  doc.text(L.total, totalsX, y); doc.text(fmtMoney2(inv.amount, inv.lang), 545, y, {align:'right'});
 
   y += 34;
   doc.setDrawColor(226,232,240); doc.line(50,y,545,y);
@@ -1463,6 +1472,9 @@ function generateInvoicePDF(inv){
   y += 15; doc.setTextColor(...muted); doc.text(`${L.freq}: `, 50, y); doc.setTextColor(...navy); doc.text(freqLabels[inv.frequency]||inv.frequency, 140, y);
   if(inv.frequency !== 'unique'){
     y += 15; doc.setTextColor(...muted); doc.text(`${L.versements}: `, 50, y); doc.setTextColor(...navy); doc.text(String(inv.installments_count), 140, y);
+    if(inv.first_installment_date){
+      y += 15; doc.setTextColor(...muted); doc.text(`${L.premier_versement}: `, 50, y); doc.setTextColor(...navy); doc.text(inv.first_installment_date, 140, y);
+    }
   }
   if(inv.due_date){
     y += 15; doc.setTextColor(...muted); doc.text(`${L.echeance}: `, 50, y); doc.setTextColor(...navy); doc.text(inv.due_date, 140, y);
