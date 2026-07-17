@@ -273,6 +273,9 @@ const SEND_INVOICE_URL = SUPABASE_URL + '/functions/v1/send-invoice';
     <button class="btn btn-brand" style="width:100%;justify-content:center;margin-top:16px;padding:10px" onclick="doLogin()">
       <span id="login-btn">Se connecter</span>
     </button>
+    <div style="text-align:center;margin-top:14px">
+      <a href="#" onclick="skipLogin();return false" style="font-size:.72rem;color:var(--muted);text-decoration:underline" id="login-skip">Continuer sans connexion pour l'instant (temporaire)</a>
+    </div>
   </div>
 </div>
 
@@ -1099,6 +1102,7 @@ const EXTRA_I18N = {
   'login-lbl-email':{fr:'Courriel',en:'Email'},
   'login-lbl-pass':{fr:'Mot de passe',en:'Password'},
   'login-btn':{fr:'Se connecter',en:'Sign in'},
+  'login-skip':{fr:"Continuer sans connexion pour l'instant (temporaire)",en:'Continue without signing in for now (temporary)'},
   'fm-lbl-1':{fr:'Montant conclu',en:'Contracted amount'},
   'fm-sub-1':{fr:'Total facturé',en:'Total invoiced'},
   'fm-lbl-2':{fr:'Mensualités payées',en:'Installments paid'},
@@ -1191,6 +1195,9 @@ async function checkAuth(){
   const { data } = await sb.auth.getSession();
   if(data.session){ boot(); }
   else { document.getElementById('login-wrap').classList.remove('hidden'); document.getElementById('app-root').classList.add('hidden'); }
+}
+function skipLogin(){
+  boot();
 }
 function boot(){
   document.getElementById('login-wrap').classList.add('hidden');
