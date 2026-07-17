@@ -1,222 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shining Legacy — Website Assessment</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<title>Novaris Solution — Questionnaire client</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@1,600;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --green:#5CB85C;--green-dk:#4A9B4A;
-  --green-bg:rgba(92,184,92,0.06);--green-bg2:rgba(92,184,92,0.12);
-  --navy:#1A3A5C;--navy2:#1E4470;
-  --bg:#F5F7FA;--surface:#fff;--surface2:#F8FAFC;
-  --t1:#111827;--t2:#374151;--t3:#6B7280;--t4:#9CA3AF;
-  --border:#E5E7EB;--border2:#D1D5DB;
-  --radius:10px;--shadow:0 1px 4px rgba(0,0,0,0.07);
+  /* Charte de couleur Novaris Solution — identique au dashboard */
+  --brand:#6C3FC5;--brand-dark:#5530A3;--brand-bg:rgba(108,63,197,0.06);--brand-bg2:rgba(108,63,197,0.12);
+  --navy:#0F172A;--navy2:#1E293B;
+  --bg:#F8FAFC;--surface:#fff;--surface2:#F8FAFC;
+  --t1:#0F172A;--t2:#334155;--t3:#64748B;--t4:#94A3B8;
+  --border:#E2E8F0;--border2:#CBD5E1;
+  --radius:12px;--shadow:0 1px 4px rgba(0,0,0,0.06);
   --tr:0.15s ease;
 }
 
-/* ── PROGRESS RAIL ── */
 #rail{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:300}
-#fill{height:100%;background:linear-gradient(90deg,var(--green),var(--green-dk));border-radius:0 2px 2px 0;transition:width .4s cubic-bezier(.4,0,.2,1)}
+#fill{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand-dark));border-radius:0 2px 2px 0;transition:width .4s cubic-bezier(.4,0,.2,1)}
 
-/* ── NAV (sticky below rail) ── */
-nav{
-  position:sticky;top:3px;
-  background:rgba(255,255,255,.95);
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-  border-bottom:1px solid var(--border);
-  z-index:200;
-}
-.nav-in{
-  max-width:620px;margin:0 auto;
-  padding:0 18px;height:58px;
-  display:flex;align-items:center;justify-content:space-between;
-}
+nav{position:sticky;top:3px;background:rgba(255,255,255,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);z-index:200}
+.nav-in{max-width:620px;margin:0 auto;padding:0 18px;height:58px;display:flex;align-items:center;justify-content:space-between}
 .logo{display:flex;align-items:center;gap:9px;text-decoration:none}
-.logo-icon{
-  width:34px;height:34px;background:var(--green);border-radius:8px;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
+.logo-icon{width:34px;height:34px;background:var(--brand);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .logo-icon svg{color:#fff;width:17px;height:17px}
-.logo-text{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;color:var(--navy);line-height:1.2}
-.logo-text span{display:block;font-size:.62rem;font-weight:500;color:var(--t3);font-family:'Inter',sans-serif}
+.logo-text{font-family:'Lora',serif;font-style:italic;font-size:.9rem;font-weight:700;color:var(--navy);line-height:1.2}
+.logo-text span{display:block;font-size:.62rem;font-weight:500;color:var(--t3);font-family:'Inter',sans-serif;font-style:normal}
 .nav-r{display:flex;align-items:center;gap:10px}
 .step-lbl{font-size:.75rem;font-weight:600;color:var(--t3);font-family:'Inter',sans-serif}
-.step-lbl b{color:var(--green)}
-.btn-rsec{
-  font-size:.72rem;font-weight:500;color:var(--t3);
-  background:none;border:1px solid var(--border);
-  padding:4px 10px;border-radius:6px;cursor:pointer;
-  display:flex;align-items:center;gap:4px;
-  transition:color var(--tr),border-color var(--tr);
-  font-family:'Inter',sans-serif;
-}
+.step-lbl b{color:var(--brand)}
+.btn-rsec{font-size:.72rem;font-weight:500;color:var(--t3);background:none;border:1px solid var(--border);padding:4px 10px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:4px;transition:color var(--tr),border-color var(--tr);font-family:'Inter',sans-serif}
 .btn-rsec:hover{color:var(--t1);border-color:var(--border2)}
 .btn-rsec svg{width:11px;height:11px}
 
-/* ── BODY / WRAP ── */
-body{
-  font-family:'Inter',system-ui,-apple-system,sans-serif;
-  background:var(--bg);color:var(--t1);
-  font-size:15px;line-height:1.55;
-  min-height:100vh;
-  -webkit-font-smoothing:antialiased;
-}
-h1,h2,h3,h4{font-family:'Syne',sans-serif}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--t1);font-size:15px;line-height:1.55;min-height:100vh;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:'Lora',serif;font-style:italic}
 .wrap{max-width:580px;margin:0 auto;padding:32px 18px 80px}
 
-/* ── STEP VISIBILITY ── */
 .step{display:none}
 .step.on{display:block;animation:fadeUp .25s ease both}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── STEP HEADER ── */
-.sec-eyebrow{
-  display:inline-flex;align-items:center;gap:6px;
-  font-size:.68rem;font-weight:700;color:var(--green);
-  text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;
-}
-.sec-eyebrow::after{content:'';display:inline-block;width:32px;height:1px;background:rgba(92,184,92,.4)}
-.qt{font-size:1.2rem;font-weight:800;color:var(--navy);margin-bottom:5px;line-height:1.3;letter-spacing:-.3px}
-.qh{font-size:.83rem;color:var(--t3);margin-bottom:20px;line-height:1.6}
+.sec-eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:.68rem;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;font-family:'Inter',sans-serif}
+.sec-eyebrow::after{content:'';display:inline-block;width:32px;height:1px;background:rgba(108,63,197,.4)}
+.qt{font-size:1.25rem;font-weight:700;font-style:italic;color:var(--navy);margin-bottom:5px;line-height:1.3;letter-spacing:-.3px}
+.qh{font-size:.83rem;color:var(--t3);margin-bottom:20px;line-height:1.6;font-family:'Inter',sans-serif;font-style:normal}
 
-/* ── OPTIONS ── */
 .opts{display:flex;flex-direction:column;gap:7px}
-.opt{
-  display:flex;align-items:center;gap:12px;
-  padding:11px 14px;
-  background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);
-  cursor:pointer;transition:background var(--tr),border-color var(--tr);
-  user-select:none;
-}
-.opt:hover{background:var(--green-bg);border-color:var(--green)}
-.opt.sel{background:var(--green-bg);border-color:var(--green)}
-.opt input{position:absolute;opacity:0;width:0;height:0;pointer-events:none}
-.ind{
-  width:20px;height:20px;border-radius:50%;
-  border:2px solid var(--border2);flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  transition:background var(--tr),border-color var(--tr);
-  background:var(--surface);
-}
-.opt.sel .ind{background:var(--green);border-color:var(--green)}
+.opt{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:background var(--tr),border-color var(--tr);user-select:none}
+.opt:hover{background:var(--brand-bg);border-color:var(--brand)}
+.opt.sel{background:var(--brand-bg);border-color:var(--brand)}
+.ind{width:20px;height:20px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background var(--tr),border-color var(--tr);background:var(--surface)}
+.opt.sel .ind{background:var(--brand);border-color:var(--brand)}
 .ck{display:none;color:#fff}
 .opt.sel .ck{display:block}
 .cb{border-radius:4px}
 .opt-tx{font-size:.85rem;font-weight:500;color:var(--t2);line-height:1.4;flex:1}
-.opt.sel .opt-tx{color:var(--green);font-weight:600}
-.opt-desc{font-size:.72rem;color:var(--t3);margin-top:2px}
-.opt.sel .opt-desc{color:var(--green-dk)}
+.opt.sel .opt-tx{color:var(--brand-dark);font-weight:600}
 
-/* ── FIELDS ── */
 .field{margin-bottom:13px}
 .field label{display:block;font-size:.75rem;font-weight:600;color:var(--navy);margin-bottom:5px}
-.req{color:var(--green)}
-.fld{
-  width:100%;padding:9px 12px;
-  border:1.5px solid var(--border);border-radius:8px;
-  font-family:'Inter',sans-serif;font-size:.85rem;color:var(--t1);
-  background:var(--surface);outline:none;
-  transition:border-color var(--tr),box-shadow var(--tr);
-}
-.fld:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(92,184,92,.1)}
+.req{color:var(--brand)}
+.fld{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.85rem;color:var(--t1);background:var(--surface);outline:none;transition:border-color var(--tr),box-shadow var(--tr)}
+.fld:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(108,63,197,.1)}
 .fld::placeholder{color:var(--t4)}
-select.fld{cursor:pointer;appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg width='11' height='7' viewBox='0 0 11 7' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5.5 6L10 1' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 11px center;padding-right:32px}
+select.fld{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='11' height='7' viewBox='0 0 11 7' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5.5 6L10 1' stroke='%2364748B' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:32px}
 textarea.fld{resize:vertical;min-height:88px;line-height:1.6}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-.hint{font-size:.7rem;color:var(--t3);margin-top:4px}
 .char-cnt{font-size:.68rem;color:var(--t4);text-align:right;margin-top:3px}
 
-/* ── IMPORTANCE TABLE ── */
 .imp{border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden}
 .imp-row{display:grid;grid-template-columns:1fr 140px;gap:10px;align-items:center;padding:9px 13px;border-bottom:1px solid var(--border);background:var(--surface)}
 .imp-row:last-child{border-bottom:none}
 .imp-row:nth-child(even){background:var(--surface2)}
 .imp-lbl{font-size:.82rem;color:var(--t1)}
-.imp-sel{
-  font-size:.75rem;padding:5px 8px;
-  border:1px solid var(--border);border-radius:6px;
-  background:var(--surface);color:var(--t1);
-  font-family:'Inter',sans-serif;cursor:pointer;outline:none;
-  appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg width='9' height='6' viewBox='0 0 9 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L4.5 5L8 1' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 7px center;padding-right:22px;width:100%;
-}
-.imp-sel:focus{border-color:var(--green)}
+.imp-sel{font-size:.75rem;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--t1);font-family:'Inter',sans-serif;cursor:pointer;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='9' height='6' viewBox='0 0 9 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L4.5 5L8 1' stroke='%2364748B' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;padding-right:22px;width:100%}
+.imp-sel:focus{border-color:var(--brand)}
 
-/* ── RANGE ── */
 .range-wrap{margin-top:6px}
 .range-row{display:flex;align-items:center;gap:14px}
-.range-row input[type=range]{
-  flex:1;accent-color:var(--green);
-  height:5px;cursor:pointer;
-  -webkit-appearance:none;appearance:none;
-  background:linear-gradient(to right,var(--green) 0%,var(--green) 50%,var(--border) 50%,var(--border) 100%);
-  border-radius:3px;
-}
-.range-val{font-size:.9rem;font-weight:700;color:var(--green);min-width:110px;text-align:right;font-family:'Syne',sans-serif}
-.range-labels{display:flex;justify-content:space-between;font-size:.68rem;color:var(--t3);margin-top:5px}
+.range-row input[type=range]{flex:1;accent-color:var(--brand);height:5px;cursor:pointer;-webkit-appearance:none;appearance:none;background:linear-gradient(to right,var(--brand) 0%,var(--brand) 50%,var(--border) 50%,var(--border) 100%);border-radius:3px}
+.range-val{font-size:.9rem;font-weight:700;color:var(--brand);min-width:110px;text-align:right;font-family:'Lora',serif;font-style:italic}
 
-/* ── BTNS ── */
 .btns{display:flex;gap:8px;margin-top:22px;align-items:center}
-.btn-next{
-  display:inline-flex;align-items:center;justify-content:center;gap:7px;
-  background:var(--green);color:#fff;
-  border:none;padding:11px 28px;border-radius:8px;
-  font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;
-  cursor:pointer;flex:1;
-  box-shadow:0 4px 14px rgba(92,184,92,.25);
-  transition:background var(--tr),transform var(--tr);
-  min-height:46px;
-}
-.btn-next:hover{background:var(--green-dk);transform:translateY(-1px)}
+.btn-next{display:inline-flex;align-items:center;justify-content:center;gap:7px;background:var(--brand);color:#fff;border:none;padding:11px 28px;border-radius:8px;font-family:'Inter',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;flex:1;box-shadow:0 4px 14px rgba(108,63,197,.25);transition:background var(--tr),transform var(--tr);min-height:46px}
+.btn-next:hover{background:var(--brand-dark);transform:translateY(-1px)}
 .btn-next:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.btn-back{
-  display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  background:var(--surface);color:var(--t2);
-  border:1.5px solid var(--border);padding:11px 20px;border-radius:8px;
-  font-family:'Inter',sans-serif;font-size:.83rem;font-weight:600;
-  cursor:pointer;min-height:46px;
-  transition:background var(--tr),border-color var(--tr);
-}
+.btn-back{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--surface);color:var(--t2);border:1.5px solid var(--border);padding:11px 20px;border-radius:8px;font-family:'Inter',sans-serif;font-size:.83rem;font-weight:600;cursor:pointer;min-height:46px;transition:background var(--tr),border-color var(--tr)}
 .btn-back:hover{background:var(--bg);border-color:var(--border2)}
 .btn-back:disabled{opacity:.3;cursor:not-allowed}
 
-/* ── DOTS ── */
 .dots{display:flex;gap:4px;justify-content:center;margin-top:16px}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all .2s}
-.dot.on{background:var(--green);width:18px;border-radius:3px}
-.dot.done{background:rgba(92,184,92,.4)}
+.dot.on{background:var(--brand);width:18px;border-radius:3px}
+.dot.done{background:rgba(108,63,197,.4)}
 
-/* ── ERROR ── */
-.em{display:none;align-items:center;gap:6px;font-size:.78rem;color:#B91C1C;
-  background:#FEF2F2;border:1px solid #FECACA;padding:9px 13px;border-radius:7px;margin-top:10px}
+.em{display:none;align-items:center;gap:6px;font-size:.78rem;color:#B91C1C;background:#FEF2F2;border:1px solid #FECACA;padding:9px 13px;border-radius:7px;margin-top:10px}
 .em.vis{display:flex}
 .em svg{width:14px;height:14px;flex-shrink:0}
 
-/* ── SUCCESS ── */
 .ty{display:none;text-align:center;padding:56px 0}
 .ty.vis{display:block}
-.ty-icon{width:66px;height:66px;background:#DCFCE7;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
-.ty-icon svg{color:#16A34A}
+.ty-icon{width:66px;height:66px;background:var(--brand-bg2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
+.ty-icon svg{color:var(--brand)}
 .ty h2{font-size:1.5rem;color:var(--navy);margin-bottom:10px}
-.ty > p{font-size:.87rem;color:var(--t2);max-width:380px;margin:0 auto;line-height:1.75}
-.btn-restart{
-  display:inline-flex;align-items:center;gap:6px;
-  margin-top:22px;background:transparent;
-  border:1.5px solid var(--green);color:var(--green);
-  padding:9px 22px;border-radius:8px;
-  font-family:'Syne',sans-serif;font-size:.83rem;font-weight:700;
-  cursor:pointer;transition:background var(--tr);
-}
-.btn-restart:hover{background:var(--green-bg)}
+.ty > p{font-size:.87rem;color:var(--t2);max-width:380px;margin:0 auto;line-height:1.75;font-family:'Inter',sans-serif;font-style:normal}
+.btn-restart{display:inline-flex;align-items:center;gap:6px;margin-top:22px;background:transparent;border:1.5px solid var(--brand);color:var(--brand);padding:9px 22px;border-radius:8px;font-family:'Inter',sans-serif;font-size:.83rem;font-weight:700;cursor:pointer;transition:background var(--tr)}
+.btn-restart:hover{background:var(--brand-bg)}
+
+.loading-wrap{text-align:center;padding:80px 0;color:var(--t3);font-size:.85rem}
 
 @media(max-width:520px){
   .g2{grid-template-columns:1fr}
@@ -237,20 +132,20 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 </script>
 
 <!-- RAIL -->
-<div id="rail"><div id="fill" style="width:11%"></div></div>
+<div id="rail"><div id="fill" style="width:0%"></div></div>
 
 <!-- NAV -->
 <nav>
   <div class="nav-in">
     <div class="logo">
       <div class="logo-icon">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l14 9-14 9V3z"/></svg>
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
       </div>
-      <div class="logo-text">Shining Legacy<span>Website Assessment</span></div>
+      <div class="logo-text">Novaris Solution<span>Questionnaire client</span></div>
     </div>
     <div class="nav-r">
-      <span class="step-lbl"><b id="cur-n">1</b> / 9</span>
-      <button class="btn-rsec" onclick="resetStep()" title="Reset this section">
+      <span class="step-lbl"><b id="cur-n">1</b> / <span id="tot-n">—</span></span>
+      <button class="btn-rsec" onclick="resetStep()" title="Réinitialiser cette section">
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
         Reset
       </button>
@@ -260,407 +155,230 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 <!-- CONTENT -->
 <div class="wrap">
+  <div class="loading-wrap" id="loading">Chargement du questionnaire…</div>
+  <div id="steps-container"></div>
 
-<!-- STEP 1 — Business info -->
-<div class="step on" id="s1">
-  <div class="sec-eyebrow">Getting started</div>
-  <div class="qt">Hi Danielle, let's build the perfect solution for Shining Legacy</div>
-  <div class="qh">This assessment takes about 5 minutes. Patrick will use your answers to prepare a detailed, personalized proposal within 24 hours.</div>
-  <div class="g2">
-    <div class="field"><label>Business Name <span class="req">*</span></label><input class="fld" id="f-business_name" type="text" placeholder="Your company name"></div>
-    <div class="field"><label>Your Full Name <span class="req">*</span></label><input class="fld" id="f-contact_name" type="text" placeholder="First and last name"></div>
+  <!-- SUCCESS -->
+  <div class="ty" id="ty">
+    <div class="ty-icon"><svg width="30" height="30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+    <h2>Merci !</h2>
+    <p>Votre questionnaire a été soumis. Patrick l'étudiera et vous enverra une proposition personnalisée dans les <strong>24 heures</strong>.</p>
+    <button class="btn-restart" onclick="restart()">
+      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      Recommencer
+    </button>
   </div>
-  <div class="g2">
-    <div class="field"><label>Email Address <span class="req">*</span></label><input class="fld" id="f-email" type="email" placeholder="yourname@company.com"></div>
-    <div class="field"><label>Phone Number</label><input class="fld" id="f-phone" type="tel" placeholder="(xxx) xxx-xxxx"></div>
-  </div>
-  <div class="g2">
-    <div class="field"><label>City / Region</label><input class="fld" id="f-city" type="text" placeholder="e.g. Durham, GTA"></div>
-    <div class="field"><label>Years in Business</label>
-      <select class="fld" id="f-years_in_business">
-        <option value="">Select...</option>
-        <option>Less than 1 year</option><option>1-2 years</option>
-        <option>3-5 years</option><option>5-10 years</option><option>10+ years</option>
-      </select>
-    </div>
-  </div>
-  <div class="field"><label>Team Size</label>
-    <select class="fld" id="f-team_size">
-      <option value="">Select...</option>
-      <option>Just me (solo)</option><option>2-5 people</option>
-      <option>6-10 people</option><option>11-25 people</option><option>25+ people</option>
-    </select>
-  </div>
-  <div class="em" id="em1"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>Please fill in Business Name, Full Name and Email to continue.</div>
-  <div class="btns"><button class="btn-next" onclick="go(2)">Next <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button></div>
-  <div class="dots" id="dots1"></div>
 </div>
-
-<!-- STEP 2 — Lead sources -->
-<div class="step" id="s2">
-  <div class="sec-eyebrow">Current situation</div>
-  <div class="qt">How do you currently get most of your clients?</div>
-  <div class="qh">Select all that apply.</div>
-  <div class="opts" data-f="lead_source" data-t="check">
-    <div class="opt" data-v="Word of mouth / Referrals"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Word of mouth / Referrals</span></div>
-    <div class="opt" data-v="Door to door / Cold outreach"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Door to door / Cold outreach</span></div>
-    <div class="opt" data-v="Google Search"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Google Search (organic or ads)</span></div>
-    <div class="opt" data-v="Social media (Facebook, Instagram)"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Social media (Facebook / Instagram)</span></div>
-    <div class="opt" data-v="Online directories"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Online directories (Yelp, HomeStars)</span></div>
-  </div>
-  <div class="btns"><button class="btn-back" onclick="go(1)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><button class="btn-next" onclick="go(3)">Next <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button></div>
-  <div class="dots" id="dots2"></div>
-</div>
-
-<!-- STEP 3 — Client types + website + MRR -->
-<div class="step" id="s3">
-  <div class="sec-eyebrow">Current situation</div>
-  <div class="qt">What types of clients do you currently serve?</div>
-  <div class="qh">Select all that apply.</div>
-  <div class="opts" data-f="client_type" data-t="check">
-    <div class="opt" data-v="Dental / Medical offices"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Dental / Medical offices</span></div>
-    <div class="opt" data-v="Corporate offices"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Corporate offices</span></div>
-    <div class="opt" data-v="Retail stores"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Retail stores</span></div>
-    <div class="opt" data-v="Post-construction"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Post-construction (one-time)</span></div>
-    <div class="opt" data-v="Warehouses / Industrial"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Warehouses / Industrial</span></div>
-  </div>
-  <div style="margin-top:18px">
-    <div class="qt" style="font-size:1rem;margin-bottom:5px">Do you currently have a website?</div>
-    <div class="opts" data-f="has_website" data-t="radio">
-      <div class="opt" data-v="Yes, but not generating leads"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Yes - but not generating leads</span></div>
-      <div class="opt" data-v="No website yet"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">No website yet</span></div>
-    </div>
-  </div>
-  <div style="margin-top:14px">
-    <div class="field"><label>Approximate current monthly recurring revenue</label>
-      <select class="fld" id="f-current_mrr">
-        <option value="">Prefer not to say</option>
-        <option>Under $2,000 / month</option><option>$2,000 - $5,000 / month</option>
-        <option>$5,000 - $10,000 / month</option><option>$10,000 - $20,000 / month</option>
-        <option>$20,000+ / month</option>
-      </select>
-    </div>
-  </div>
-  <div class="btns"><button class="btn-back" onclick="go(2)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><button class="btn-next" onclick="go(4)">Next <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button></div>
-  <div class="dots" id="dots3"></div>
-</div>
-
-<!-- STEP 4 — Goals -->
-<div class="step" id="s4">
-  <div class="sec-eyebrow">Your goals</div>
-  <div class="qt">What is your primary goal for the next 12 months?</div>
-  <div class="qh">Choose one.</div>
-  <div class="opts" data-f="primary_goal" data-t="radio">
-    <div class="opt" data-v="Get more leads online"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Get more leads online - stop door to door</span></div>
-    <div class="opt" data-v="Sign larger corporate GTA contracts"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Sign larger corporate contracts in the GTA</span></div>
-    <div class="opt" data-v="Go full-time with Shining Legacy"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Go full-time with Shining Legacy</span></div>
-    <div class="opt" data-v="All of the above"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">All of the above</span></div>
-  </div>
-  <div style="margin-top:18px">
-    <div class="qt" style="font-size:1rem;margin-bottom:5px">Target clients you most want to attract</div>
-    <div class="qh" style="margin-bottom:10px">Select all that apply.</div>
-    <div class="opts" data-f="target_client" data-t="check">
-      <div class="opt" data-v="Large corporate offices (GTA)"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Large corporate offices in the GTA</span></div>
-      <div class="opt" data-v="Medical / healthcare facilities"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Medical / healthcare facilities</span></div>
-      <div class="opt" data-v="Property management companies"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Property management companies</span></div>
-      <div class="opt" data-v="Retail chains"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Retail chains / franchise locations</span></div>
-      <div class="opt" data-v="Construction companies"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Construction companies (post-build)</span></div>
-      <div class="opt" data-v="Warehouses / distribution centers"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Warehouses / distribution centers</span></div>
-    </div>
-  </div>
-  <div class="btns"><button class="btn-back" onclick="go(3)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><button class="btn-next" onclick="go(5)">Next <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button></div>
-  <div class="dots" id="dots4"></div>
-</div>
-
-<!-- STEP 5 — Revenue target -->
-<div class="step" id="s5">
-  <div class="sec-eyebrow">Your goals</div>
-  <div class="qt">What is your target monthly revenue in 12 months?</div>
-  <div class="qh">Drag the slider to set your goal.</div>
-  <div class="range-wrap">
-    <div class="range-row">
-      <input type="range" id="rev-slider" min="3000" max="50000" step="1000" value="10000" oninput="updRev(this.value)">
-      <span class="range-val" id="rev-val">$10,000/mo</span>
-    </div>
-    <div class="range-labels"><span>$3,000</span><span>$50,000</span></div>
-  </div>
-  <div class="btns"><button class="btn-back" onclick="go(4)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><button class="btn-next" onclick="go(6)">Next <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button></div>
-  <div class="dots" id="dots5"></div>
-</div>
-
-<!-- STEP 6 — Features -->
-<div class="step" id="s6">
-  <div class="sec-eyebrow">Website features</div>
-  <div class="qt">Rate each feature by priority level</div>
-  <div class="qh">Select Must have, Nice to have, or Not needed for each.</div>
-  <div class="imp">
-    <div class="imp-row"><span class="imp-lbl">Instant online quote request form</span><select class="imp-sel" id="f-feat_quote" onchange="S.feat_quote=this.value"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
-    <div class="imp-row"><span class="imp-lbl">AI chatbot (answers 24/7)</span><select class="imp-sel" id="f-feat_chatbot" onchange="S.feat_chatbot=this.value"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
-    <div class="imp-row"><span class="imp-lbl">Live chat with real-time notifications</span><select class="imp-sel" id="f-feat_live_chat" onchange="S.feat_live_chat=this.value"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
-    <div class="imp-row"><span class="imp-lbl">Client portal (invoices, history)</span><select class="imp-sel" id="f-feat_portal" onchange="S.feat_portal=this.value"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
-    <div class="imp-row"><span class="imp-lbl">Online payment (Stripe)</span><select class="imp-sel" id="f-feat_payment" onchange="S.feat_payment=this.value"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
-    <div class="imp-row"><span class="imp-lbl">Automated follow-up emails</span><select class="imp-sel" id="f-feat_automation" onchange="S.feat_automation=this.value"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
-    <div class="imp-row"><span class="imp-lbl">Online booking / scheduling</span><select class="imp-sel" id="f-feat_booking" onchange="S.feat_booking=this.value"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
-    <div class="imp-row"><span class="imp-lbl">SEO (Google GTA searches)</span><select class="imp-sel" id="f-feat_seo" onchange="S.feat_seo=this.value"><option value="">Priority?</option><option>Must have</option><option>Nice to have</option><option>Not needed</option></select></div>
-  </div>
-  <div class="btns"><button class="btn-back" onclick="go(5)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><button class="btn-next" onclick="go(7)">Next <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button></div>
-  <div class="dots" id="dots6"></div>
-</div>
-
-<!-- STEP 7 — Operations -->
-<div class="step" id="s7">
-  <div class="sec-eyebrow">Operations</div>
-  <div class="qt">What tasks eat the most of your time right now?</div>
-  <div class="qh">Select all that apply.</div>
-  <div class="opts" data-f="manual_task" data-t="check">
-    <div class="opt" data-v="Following up on quote requests"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Following up on quote requests</span></div>
-    <div class="opt" data-v="Sending invoices / chasing payments"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Sending invoices and chasing payments</span></div>
-    <div class="opt" data-v="Scheduling and coordinating team"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Scheduling and coordinating team</span></div>
-    <div class="opt" data-v="Answering the same questions repeatedly"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Answering the same questions repeatedly</span></div>
-    <div class="opt" data-v="Writing and sending contracts"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Writing and sending contracts</span></div>
-    <div class="opt" data-v="Tracking who owes money"><input type="checkbox"><div class="ind cb"><svg class="ck" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="opt-tx">Tracking who owes money</span></div>
-  </div>
-  <div style="margin-top:18px">
-    <div class="qt" style="font-size:1rem;margin-bottom:5px">How do you currently send quotes?</div>
-    <div class="opts" data-f="quote_method" data-t="radio">
-      <div class="opt" data-v="By phone call only"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">By phone call only</span></div>
-      <div class="opt" data-v="By email (written manually)"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">By email (written manually each time)</span></div>
-      <div class="opt" data-v="Text message"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Text message</span></div>
-      <div class="opt" data-v="In person"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">In person only</span></div>
-    </div>
-  </div>
-  <div style="margin-top:14px">
-    <div class="qt" style="font-size:1rem;margin-bottom:5px">How quickly do you respond to a new lead?</div>
-    <div class="opts" data-f="response_time" data-t="radio">
-      <div class="opt" data-v="Within 1 hour"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Within 1 hour</span></div>
-      <div class="opt" data-v="Within 24 hours"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Within 24 hours</span></div>
-      <div class="opt" data-v="A few days"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">A few days</span></div>
-      <div class="opt" data-v="Varies - hard to keep up"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Varies - hard to keep up</span></div>
-    </div>
-  </div>
-  <div class="btns"><button class="btn-back" onclick="go(6)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><button class="btn-next" onclick="go(8)">Next <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button></div>
-  <div class="dots" id="dots7"></div>
-</div>
-
-<!-- STEP 8 — Budget -->
-<div class="step" id="s8">
-  <div class="sec-eyebrow">Budget and timeline</div>
-  <div class="qt">What investment range are you comfortable with?</div>
-  <div class="qh">Choose one.</div>
-  <div class="opts" data-f="budget" data-t="radio">
-    <div class="opt" data-v="$2,500 - $3,500"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><div><div class="opt-tx">$2,500 - $3,500</div><div class="opt-desc">Professional site + AI chatbot + SEO</div></div></div>
-    <div class="opt" data-v="$3,500 - $6,000"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><div><div class="opt-tx">$3,500 - $6,000</div><div class="opt-desc">Full site + automation + client portal</div></div></div>
-    <div class="opt" data-v="$6,000 - $10,000"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><div><div class="opt-tx">$6,000 - $10,000</div><div class="opt-desc">Custom dashboard + full automation suite</div></div></div>
-    <div class="opt" data-v="Monthly payments preferred"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><div><div class="opt-tx">I prefer monthly payments</div><div class="opt-desc">Retainer / phased approach</div></div></div>
-  </div>
-  <div style="margin-top:18px">
-    <div class="qt" style="font-size:1rem;margin-bottom:5px">Preferred launch timeline</div>
-    <div class="opts" data-f="timeline" data-t="radio">
-      <div class="opt" data-v="ASAP (within 2 weeks)"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">ASAP - within 2 weeks</span></div>
-      <div class="opt" data-v="Within 1 month"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Within 1 month</span></div>
-      <div class="opt" data-v="1-3 months"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">1-3 months - planning ahead</span></div>
-      <div class="opt" data-v="No rush"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">No specific deadline</span></div>
-    </div>
-  </div>
-  <div style="margin-top:14px">
-    <div class="qt" style="font-size:1rem;margin-bottom:5px">Open to a phased approach?</div>
-    <div class="opts" data-f="phased" data-t="radio">
-      <div class="opt" data-v="Yes - start lean and grow"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Yes - start with essentials, grow over time</span></div>
-      <div class="opt" data-v="Prefer everything upfront"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Prefer everything built upfront</span></div>
-      <div class="opt" data-v="Open to discussion"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Open to discussion</span></div>
-    </div>
-  </div>
-  <div class="btns"><button class="btn-back" onclick="go(7)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><button class="btn-next" onclick="go(9)">Next <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button></div>
-  <div class="dots" id="dots8"></div>
-</div>
-
-<!-- STEP 9 — Final -->
-<div class="step" id="s9">
-  <div class="sec-eyebrow">Final questions</div>
-  <div class="qt">Last step - in your own words</div>
-  <div class="qh">Tell Patrick what matters most before he prepares your proposal.</div>
-  <div class="field">
-    <label>What is the biggest problem your website should solve?</label>
-    <textarea class="fld" id="f-biggest_challenge" maxlength="300" placeholder="Describe the main challenge - not enough leads, hard to respond fast, losing jobs to competitors..." oninput="S.biggest_challenge=this.value;document.getElementById('cnt1').textContent=this.value.length"></textarea>
-    <div class="char-cnt"><span id="cnt1">0</span>/300</div>
-  </div>
-  <div class="field">
-    <label>Is there a website you admire? (optional)</label>
-    <input class="fld" id="f-inspiration_url" type="text" placeholder="https://..." oninput="S.inspiration_url=this.value">
-    <div class="hint">Helps us understand the style and features you like.</div>
-  </div>
-  <div style="margin-top:4px">
-    <div class="qt" style="font-size:1rem;margin-bottom:5px">Do you have your logo, photos, and brand materials ready?</div>
-    <div class="opts" data-f="assets" data-t="radio">
-      <div class="opt" data-v="Yes - everything ready"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Yes - logo, photos, colors all ready</span></div>
-      <div class="opt" data-v="Some assets ready"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Some assets ready, need help with the rest</span></div>
-      <div class="opt" data-v="Starting from scratch"><input type="radio"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div><span class="opt-tx">Starting from scratch</span></div>
-    </div>
-  </div>
-  <div class="field" style="margin-top:14px">
-    <label>Anything else you want Patrick to know?</label>
-    <textarea class="fld" id="f-additional_notes" maxlength="400" placeholder="Feel free to share any details, concerns, or specific requests..." oninput="S.additional_notes=this.value;document.getElementById('cnt2').textContent=this.value.length"></textarea>
-    <div class="char-cnt"><span id="cnt2">0</span>/400</div>
-  </div>
-  <div class="em" id="em9"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>Something went wrong. Please try again or email Patrick directly.</div>
-  <div class="btns"><button class="btn-back" onclick="go(8)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><button class="btn-next" id="btn-submit" onclick="submit()"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg> Submit</button></div>
-  <div class="dots" id="dots9"></div>
-</div>
-
-<!-- SUCCESS -->
-<div class="ty" id="ty">
-  <div class="ty-icon"><svg width="30" height="30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
-  <h2>Thank you, Danielle!</h2>
-  <p>Your assessment has been submitted. Patrick will review your answers and send you a detailed, personalized proposal within <strong>24 hours</strong>.</p>
-  <button class="btn-restart" onclick="restart()">
-    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-    Start Over
-  </button>
-</div>
-
-</div><!-- /wrap -->
 
 <script>
-var TOTAL = 9;
-var cur = 1;
-var S = {
-  client_name:'Danielle', status:'new',
-  revenue_target:'10000', revenue_target_display:'$10,000/month',
-  biggest_challenge:'', additional_notes:'', inspiration_url:''
-};
+// ══════════════════════════════════════════════════════════
+// SURVEY DYNAMIQUE — piloté par la table `survey_config`,
+// éditable depuis l'onglet "Survey" du dashboard Novaris.
+// ══════════════════════════════════════════════════════════
 
-// ── BUILD DOTS ──
-for (var i = 1; i <= TOTAL; i++) {
-  var dc = document.getElementById('dots' + i);
-  if (!dc) continue;
-  var html = '';
-  for (var j = 1; j <= TOTAL; j++) {
-    html += '<div class="dot' + (j === i ? ' on' : '') + '" id="d' + i + '_' + j + '"></div>';
+const KNOWN_COLUMNS = new Set([
+  'business_name','contact_name','email','phone','city','years_in_business','team_size',
+  'current_mrr','revenue_target','revenue_target_display','has_website',
+  'feat_chatbot','feat_quote','feat_portal','feat_payment','feat_automation','feat_seo','feat_booking','feat_live_chat',
+  'timeline','budget','assets','biggest_challenge','additional_notes',
+  'lead_source','manual_task','primary_goal','phased','quote_method','response_time'
+]);
+
+let STEPS = [];
+let TOTAL = 0;
+let cur = 0;
+let S = { status:'new' };
+
+async function loadSurvey(){
+  const { data, error } = await sb.from('survey_config').select('*').eq('active', true).order('step_number').order('sort_order');
+  if(error || !data || !data.length){
+    document.getElementById('loading').textContent = "Le questionnaire n'est pas disponible pour le moment. Merci de réessayer plus tard.";
+    return;
   }
-  dc.innerHTML = html;
+  const grouped = {};
+  data.forEach(f=>{ (grouped[f.step_number] = grouped[f.step_number]||[]).push(f); });
+  STEPS = Object.keys(grouped).map(Number).sort((a,b)=>a-b).map(sn=>grouped[sn]);
+  TOTAL = STEPS.length;
+  document.getElementById('tot-n').textContent = TOTAL;
+  renderSteps();
+  document.getElementById('loading').style.display = 'none';
+  go(0, true);
 }
 
-// ── WIRE OPT CLICKS ──
-document.querySelectorAll('.opts').forEach(function(group) {
-  var field = group.getAttribute('data-f');
-  var type  = group.getAttribute('data-t');
-  group.querySelectorAll('.opt').forEach(function(opt) {
-    opt.addEventListener('click', function() {
-      var val = this.getAttribute('data-v');
-      if (type === 'radio') {
-        group.querySelectorAll('.opt').forEach(function(o) { o.classList.remove('sel'); });
-        this.classList.add('sel');
-        S[field] = val;
-      } else {
-        this.classList.toggle('sel');
-        var vals = [];
-        group.querySelectorAll('.opt.sel').forEach(function(o) { vals.push(o.getAttribute('data-v')); });
-        S[field] = vals.join(', ');
-      }
-    });
-  });
-});
-
-// ── WIRE TEXT INPUTS ──
-['business_name','contact_name','email','phone','city'].forEach(function(f) {
-  var el = document.getElementById('f-' + f);
-  if (el) el.addEventListener('input', function() { S[f] = this.value; });
-});
-['years_in_business','team_size','current_mrr'].forEach(function(f) {
-  var el = document.getElementById('f-' + f);
-  if (el) el.addEventListener('change', function() { S[f] = this.value; });
-});
-
-// ── RANGE ──
-function updRev(v) {
-  var n = Number(v);
-  document.getElementById('rev-val').textContent = '$' + n.toLocaleString() + '/mo';
-  S.revenue_target = String(n);
-  S.revenue_target_display = '$' + n.toLocaleString() + '/month';
-  // Update gradient
-  var pct = Math.round(((n - 3000) / (50000 - 3000)) * 100);
-  document.getElementById('rev-slider').style.background =
-    'linear-gradient(to right,var(--green) 0%,var(--green) ' + pct + '%,var(--border) ' + pct + '%,var(--border) 100%)';
+function fieldTemplate(f){
+  const req = f.required ? ' <span class="req">*</span>' : '';
+  switch(f.field_type){
+    case 'text':
+    case 'textarea': {
+      const isArea = f.field_type==='textarea';
+      const tag = isArea
+        ? `<textarea class="fld" id="f-${f.field_key}" maxlength="500" placeholder="${f.placeholder_fr||''}" oninput="S['${f.field_key}']=this.value;updCount('${f.field_key}')"></textarea>`
+        : `<input class="fld" id="f-${f.field_key}" type="text" placeholder="${f.placeholder_fr||''}" oninput="S['${f.field_key}']=this.value">`;
+      return `<div class="field"><label>${f.question_fr}${req}</label>${tag}${isArea?`<div class="char-cnt"><span id="cnt-${f.field_key}">0</span>/500</div>`:''}</div>`;
+    }
+    case 'select': {
+      const opts = (f.options||[]).map(o=>`<option value="${o.value}">${o.label_fr}</option>`).join('');
+      return `<div class="field"><label>${f.question_fr}${req}</label><select class="fld" id="f-${f.field_key}" onchange="S['${f.field_key}']=this.value"><option value="">Sélectionner…</option>${opts}</select></div>`;
+    }
+    case 'radio':
+    case 'checkbox': {
+      const type = f.field_type;
+      const opts = (f.options||[]).map(o=>`
+        <div class="opt" data-v="${o.value}" onclick="pickOpt(this,'${f.field_key}','${type}')">
+          <input type="${type==='radio'?'radio':'checkbox'}"><div class="ind"><svg class="ck" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div>
+          <span class="opt-tx">${o.label_fr}</span>
+        </div>`).join('');
+      return `<div class="field"><label>${f.question_fr}${req}</label><div class="opts">${opts}</div></div>`;
+    }
+    case 'importance': {
+      const opts = (f.options && f.options.length) ? f.options : [
+        {value:'Must have',label_fr:'Essentiel'},{value:'Nice to have',label_fr:'Souhaitable'},{value:'Not needed',label_fr:'Non requis'}
+      ];
+      const selOpts = opts.map(o=>`<option value="${o.value}">${o.label_fr}</option>`).join('');
+      return `<div class="imp-row"><div class="imp-lbl">${f.question_fr}</div><select class="imp-sel" id="f-${f.field_key}" onchange="S['${f.field_key}']=this.value"><option value="">—</option>${selOpts}</select></div>`;
+    }
+    case 'range': {
+      const min = f.min_val??0, max = f.max_val??100, step = f.step_val??1, suf = f.suffix||'';
+      const mid = Math.round((min+max)/2);
+      return `<div class="field">
+        <label>${f.question_fr}${req}</label>
+        <div class="range-wrap">
+          <div class="range-row">
+            <input type="range" id="f-${f.field_key}" min="${min}" max="${max}" step="${step}" value="${mid}" oninput="onRangeInput('${f.field_key}', this.value, ${min}, ${max}, '${suf}')">
+            <span class="range-val" id="rv-${f.field_key}">${mid}${suf}</span>
+          </div>
+        </div>
+      </div>`;
+    }
+    default: return '';
+  }
 }
 
-// ── NAVIGATE ──
-function go(n) {
-  if (n === 2) {
-    var ok = S.business_name && S.contact_name && S.email;
-    document.getElementById('em1').className = 'em' + (ok ? '' : ' vis');
-    if (!ok) return;
+function renderSteps(){
+  const container = document.getElementById('steps-container');
+  container.innerHTML = STEPS.map((fields, i)=>{
+    const first = fields[0];
+    const isImportanceGroup = fields.every(f=>f.field_type==='importance');
+    const body = isImportanceGroup
+      ? `<div class="imp">${fields.map(f=>fieldTemplate(f)).join('')}</div>`
+      : fields.map(f=>fieldTemplate(f)).join('');
+    const isLast = i === STEPS.length-1;
+    return `<div class="step" id="s${i}">
+      ${first.subtitle_fr ? `<div class="sec-eyebrow">${first.subtitle_fr}</div>` : ''}
+      <div class="qt">${first.question_fr}</div>
+      ${body}
+      <div class="em" id="em${i}"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg><span>Veuillez répondre aux questions obligatoires pour continuer.</span></div>
+      <div class="btns">
+        ${i>0 ? `<button class="btn-back" onclick="go(${i-1})"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Retour</button>` : ''}
+        ${isLast
+          ? `<button class="btn-next" id="btn-submit" onclick="submitSurvey()"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg> Envoyer</button>`
+          : `<button class="btn-next" onclick="go(${i+1})">Suivant <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>`}
+      </div>
+      <div class="dots" id="dots${i}"></div>
+    </div>`;
+  }).join('');
+
+  for(let i=0;i<STEPS.length;i++){
+    const dc = document.getElementById('dots'+i);
+    let html='';
+    for(let j=0;j<STEPS.length;j++) html += `<div class="dot${j===i?' on':''}" id="d${i}_${j}"></div>`;
+    dc.innerHTML = html;
   }
-  document.getElementById('s' + cur).classList.remove('on');
+}
+
+function pickOpt(el, key, type){
+  const group = el.parentElement;
+  if(type==='radio'){
+    group.querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));
+    el.classList.add('sel');
+    S[key] = el.getAttribute('data-v');
+  } else {
+    el.classList.toggle('sel');
+    const vals = [];
+    group.querySelectorAll('.opt.sel').forEach(o=>vals.push(o.getAttribute('data-v')));
+    S[key] = vals.join(', ');
+  }
+}
+function updCount(key){
+  const el = document.getElementById('cnt-'+key);
+  if(el) el.textContent = (S[key]||'').length;
+}
+function onRangeInput(key, v, min, max, suf){
+  const n = Number(v);
+  S[key] = String(n);
+  document.getElementById('rv-'+key).textContent = n.toLocaleString() + suf;
+  const pct = Math.round(((n-min)/(max-min))*100);
+  document.getElementById('f-'+key).style.background = `linear-gradient(to right,var(--brand) 0%,var(--brand) ${pct}%,var(--border) ${pct}%,var(--border) 100%)`;
+}
+
+function go(n, silent){
+  if(!silent && n > cur){
+    const fields = STEPS[cur];
+    const missing = fields.some(f=>f.required && !S[f.field_key]);
+    document.getElementById('em'+cur).className = 'em' + (missing?' vis':'');
+    if(missing) return;
+  }
+  document.getElementById('s'+cur)?.classList.remove('on');
   cur = n;
-  document.getElementById('s' + cur).classList.add('on');
-  document.getElementById('cur-n').textContent = cur;
-  var pct = Math.round((cur / TOTAL) * 100);
-  document.getElementById('fill').style.width = pct + '%';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById('s'+cur)?.classList.add('on');
+  document.getElementById('cur-n').textContent = cur+1;
+  const pct = Math.round(((cur+1)/TOTAL)*100);
+  document.getElementById('fill').style.width = pct+'%';
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 
-// ── RESET STEP ──
-function resetStep() {
-  var step = document.getElementById('s' + cur);
-  step.querySelectorAll('.opt').forEach(function(o) { o.classList.remove('sel'); });
-  step.querySelectorAll('.fld').forEach(function(f) {
-    f.tagName === 'SELECT' ? (f.selectedIndex = 0) : (f.value = '');
-  });
-  step.querySelectorAll('[data-f]').forEach(function(g) {
-    var field = g.getAttribute('data-f');
-    if (field) S[field] = '';
-  });
-  if (cur === 5) {
-    document.getElementById('rev-slider').value = 10000;
-    updRev(10000);
-  }
-  ['cnt1','cnt2'].forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.textContent = '0';
-  });
+function resetStep(){
+  const step = document.getElementById('s'+cur);
+  if(!step) return;
+  step.querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));
+  step.querySelectorAll('.fld').forEach(f=>{ f.tagName==='SELECT' ? (f.selectedIndex=0) : (f.value=''); });
+  STEPS[cur].forEach(f=>{ delete S[f.field_key]; });
 }
 
-// ── SUBMIT ──
-async function submit() {
-  var btn = document.getElementById('btn-submit');
-  var em  = document.getElementById('em9');
+async function submitSurvey(){
+  const fields = STEPS[cur];
+  const missing = fields.some(f=>f.required && !S[f.field_key]);
+  document.getElementById('em'+cur).className = 'em' + (missing?' vis':'');
+  if(missing) return;
+
+  const btn = document.getElementById('btn-submit');
   btn.disabled = true;
-  btn.innerHTML = 'Submitting...';
-  em.className = 'em';
-  S.submitted_at = new Date().toISOString();
-  try {
-    var res = await sb.from('survey_responses').insert([S]);
-    if (res.error) throw res.error;
-    document.getElementById('s' + cur).classList.remove('on');
+  btn.textContent = 'Envoi en cours…';
+
+  const payload = { status:'new', submitted_at: new Date().toISOString(), responses_data: {...S} };
+  Object.keys(S).forEach(k=>{ if(KNOWN_COLUMNS.has(k)) payload[k] = S[k]; });
+  if(S.contact_name) payload.client_name = S.contact_name;
+
+  try{
+    const { error } = await sb.from('survey_responses').insert([payload]);
+    if(error) throw error;
+    document.getElementById('s'+cur).classList.remove('on');
     document.getElementById('ty').className = 'ty vis';
     document.getElementById('fill').style.width = '100%';
-    document.getElementById('cur-n').textContent = TOTAL;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  } catch(ex) {
+    window.scrollTo({top:0, behavior:'smooth'});
+  }catch(ex){
     console.error(ex);
+    const em = document.getElementById('em'+cur);
     em.className = 'em vis';
+    em.querySelector('span').textContent = "Une erreur est survenue. Merci de réessayer ou d'écrire directement à Patrick.";
     btn.disabled = false;
-    btn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg> Submit';
+    btn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg> Envoyer';
   }
 }
 
-// ── RESTART ──
-function restart() {
-  S = { client_name:'Danielle', status:'new', revenue_target:'10000', revenue_target_display:'$10,000/month', biggest_challenge:'', additional_notes:'', inspiration_url:'' };
-  document.querySelectorAll('.opt').forEach(function(o) { o.classList.remove('sel'); });
-  document.querySelectorAll('.fld').forEach(function(f) {
-    f.tagName === 'SELECT' ? (f.selectedIndex = 0) : (f.value = '');
-  });
-  document.getElementById('rev-slider').value = 10000;
-  updRev(10000);
-  ['cnt1','cnt2'].forEach(function(id) { var el = document.getElementById(id); if (el) el.textContent = '0'; });
+function restart(){
+  S = { status:'new' };
+  document.querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));
+  document.querySelectorAll('.fld').forEach(f=>{ f.tagName==='SELECT' ? (f.selectedIndex=0) : (f.value=''); });
   document.getElementById('ty').className = 'ty';
-  cur = 1;
-  document.getElementById('s1').classList.add('on');
+  cur = 0;
+  document.getElementById('s0').classList.add('on');
   document.getElementById('cur-n').textContent = '1';
-  document.getElementById('fill').style.width = '11%';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById('fill').style.width = Math.round((1/TOTAL)*100)+'%';
+  window.scrollTo({top:0, behavior:'smooth'});
 }
+
+loadSurvey();
 </script>
 </body>
 </html>

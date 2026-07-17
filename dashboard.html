@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Novaris Technologies — Dashboard Clients</title>
+<title>Novaris Solution — Dashboard Clients</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -183,6 +184,63 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .pc-val{font-size:.73rem;font-weight:600;color:var(--brand);margin-top:4px}
 .pipe-empty{font-size:.72rem;color:var(--muted);text-align:center;padding:14px 8px;border:1px dashed var(--border);border-radius:8px}
 
+/* LOGIN GATE */
+.login-wrap{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:1000}
+.login-card{background:var(--white);border-radius:16px;padding:32px 30px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.login-card h1{font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:2px}
+.login-card p{font-size:.78rem;color:var(--muted);margin-bottom:18px}
+.login-card label{display:block;font-size:.72rem;font-weight:600;color:var(--navy);margin-bottom:4px;margin-top:12px}
+.login-card label:first-of-type{margin-top:0}
+.login-card input{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.85rem;outline:none}
+.login-card input:focus{border-color:var(--brand)}
+.login-err{font-size:.72rem;color:var(--red);margin-top:8px;display:none}
+.login-err.show{display:block}
+.hidden{display:none !important}
+
+/* FACTURES */
+.inv-tabs{display:flex;gap:6px;margin-bottom:14px}
+.inv-tab{padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:var(--white);font-size:.78rem;font-weight:600;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif}
+.inv-tab.active{background:var(--brand);border-color:var(--brand);color:#fff}
+.inv-subpanel{display:none}.inv-subpanel.active{display:block}
+.inv-wrap{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.inv-form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip{font-size:.72rem;padding:5px 10px;border:1px solid var(--border);border-radius:100px;cursor:pointer;background:var(--white);color:var(--text);user-select:none}
+.chip.sel{background:var(--brand-dim);border-color:var(--brand);color:var(--brand-dark);font-weight:600}
+.inv-num{font-family:monospace;font-size:.95rem;font-weight:700;color:var(--brand);background:var(--brand-dim);padding:6px 10px;border-radius:7px;display:inline-block}
+.pay-fields{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-top:8px}
+.calc-row{display:flex;justify-content:space-between;font-size:.8rem;padding:5px 0;border-bottom:1px dashed var(--border)}
+.calc-row:last-child{border-bottom:none;font-weight:700;font-size:.88rem;color:var(--navy);padding-top:8px}
+.inv-list{display:flex;flex-direction:column;gap:6px}
+.inv-row{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--card)}
+.inv-row .num{font-family:monospace;font-size:.75rem;color:var(--brand);font-weight:700}
+.inv-row .biz{font-size:.82rem;font-weight:600;color:var(--navy)}
+.inv-row .sub{font-size:.7rem;color:var(--muted)}
+.inv-row .amt{font-size:.85rem;font-weight:700;color:var(--navy);text-align:right}
+.b-draft{background:var(--border);color:var(--muted)}
+.b-sent{background:var(--blue-dim);color:#1D4ED8}
+.b-paid{background:var(--green-dim);color:#15803D}
+.b-overdue{background:rgba(239,68,68,0.1);color:#B91C1C}
+.b-cancelled{background:rgba(100,116,139,0.12);color:var(--muted)}
+.pdf-preview-frame{width:100%;height:520px;border:1px solid var(--border);border-radius:10px;background:var(--bg)}
+
+/* SURVEY BUILDER */
+.sv-step-card{border:1px solid var(--border);border-radius:10px;margin-bottom:10px;background:var(--card)}
+.sv-step-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--border);border-radius:10px 10px 0 0;font-size:.78rem;font-weight:700;color:var(--navy)}
+.sv-field-row{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--border);gap:10px}
+.sv-field-row:last-child{border-bottom:none}
+.sv-field-info{font-size:.78rem;color:var(--text)}
+.sv-field-info .k{font-family:monospace;font-size:.68rem;color:var(--muted);margin-left:6px}
+.sv-field-actions{display:flex;gap:4px;flex-shrink:0}
+.sv-field-actions button{background:none;border:1px solid var(--border);border-radius:6px;padding:4px 7px;cursor:pointer;color:var(--muted)}
+.sv-field-actions button:hover{color:var(--brand);border-color:var(--brand)}
+.sv-editor{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:sticky;top:70px}
+.opt-editor-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:center}
+.opt-editor-row input{padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:.75rem;font-family:'Inter',sans-serif}
+.toggle-row{display:flex;align-items:center;gap:8px;margin-top:10px}
+.toggle-row label{font-size:.78rem;color:var(--navy);font-weight:500}
+.sv-inactive{opacity:.45}
+
 @media(max-width:960px){
   .sidebar{width:56px}.sb-logo-text,.sb-section,.sb-user-info,.lang-toggle,.ni span,.ni-badge,.live-pulse{display:none}
   .main{margin-left:56px}.metrics{grid-template-columns:1fr 1fr}
@@ -198,8 +256,27 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 const SUPABASE_URL = 'https://aoeonvhohwgcjnvswlbt.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_259KgrJGFJIQnN4edkYGhw_e4gdyqq2';
 // Traduction : MyMemory API — 100% gratuit, 5000 mots/jour, aucun compte requis
+// URL de l'Edge Function Supabase qui envoie les factures via Resend (voir README)
+const SEND_INVOICE_URL = SUPABASE_URL + '/functions/v1/send-invoice';
 </script>
 
+<!-- LOGIN GATE (Supabase Auth) -->
+<div class="login-wrap" id="login-wrap">
+  <div class="login-card">
+    <h1 id="login-title">Novaris Solution</h1>
+    <p id="login-sub">Connexion au dashboard client</p>
+    <label id="login-lbl-email">Courriel</label>
+    <input type="email" id="login-email" placeholder="patrick@novaris-solution.com">
+    <label id="login-lbl-pass">Mot de passe</label>
+    <input type="password" id="login-pass" placeholder="••••••••">
+    <div class="login-err" id="login-err">Identifiants invalides.</div>
+    <button class="btn btn-brand" style="width:100%;justify-content:center;margin-top:16px;padding:10px" onclick="doLogin()">
+      <span id="login-btn">Se connecter</span>
+    </button>
+  </div>
+</div>
+
+<div id="app-root" class="hidden">
 <!-- SIDEBAR -->
 <nav class="sidebar">
   <div class="sb-logo">
@@ -208,7 +285,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_259KgrJGFJIQnN4edkYGhw_e4gdyqq2';
     </div>
     <div class="sb-logo-text">
       <h2>Novaris</h2>
-      <span>Technologies Inc.</span>
+      <span>Solution Inc.</span>
     </div>
   </div>
 
@@ -232,10 +309,19 @@ const SUPABASE_ANON_KEY = 'sb_publishable_259KgrJGFJIQnN4edkYGhw_e4gdyqq2';
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
       <span id="t-insights">Insights</span>
     </button>
+    <button class="ni" onclick="showP('factures',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l2 2 4-4m4.618-3.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+      <span id="t-factures">Factures</span>
+    </button>
+    <div class="sb-section" id="sb-admin">Admin</div>
+    <button class="ni" onclick="showP('survey',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+      <span id="t-survey">Survey</span>
+    </button>
   </div>
 
   <div class="sb-footer">
-    <div class="version">v1.0 · Novaris Technologies</div>
+    <div class="version">v1.0 · Novaris Solution</div>
     <div class="user">
       <div class="sb-avatar">PE</div>
       <div class="sb-user-info">
@@ -367,8 +453,159 @@ const SUPABASE_ANON_KEY = 'sb_publishable_259KgrJGFJIQnN4edkYGhw_e4gdyqq2';
         <div class="ins-card"><div class="ins-title" id="ins-t4">Pain points opérationnels</div><div id="pain-chart"><div class="empty-state" style="padding:14px;font-size:.78rem">Aucune donnée</div></div></div>
       </div>
     </div>
+
+    <!-- FACTURES -->
+    <div class="panel" id="panel-factures">
+      <div class="metrics" id="fin-metrics">
+        <div class="mc brand"><div class="lbl" id="fm-lbl-1">Montant conclu</div><div class="val" id="fm-1">0 $</div><div class="sub" id="fm-sub-1">Total facturé</div></div>
+        <div class="mc green"><div class="lbl" id="fm-lbl-2">Mensualités payées</div><div class="val" id="fm-2">0 $</div><div class="sub" id="fm-sub-2">Encaissé</div></div>
+        <div class="mc amber"><div class="lbl" id="fm-lbl-3">Mensualités à payer</div><div class="val" id="fm-3">0 $</div><div class="sub" id="fm-sub-3">En attente</div></div>
+        <div class="mc blue"><div class="lbl" id="fm-lbl-4">Montant net</div><div class="val" id="fm-4">0 $</div><div class="sub" id="fm-sub-4">Après impôts estimés</div></div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="calc-row" style="border:none;font-size:.78rem;color:var(--muted)">
+          <span id="fm-tax-lbl">Impôts estimés à provisionner (sur montant encaissé)</span>
+          <span id="fm-tax-val" style="font-weight:700;color:var(--navy)">0 $</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+          <label style="font-size:.75rem;color:var(--navy);font-weight:600" id="fm-rate-lbl">Taux de taxe / provision (%)</label>
+          <input type="number" id="tax-rate-input" step="0.01" style="width:90px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-family:'Inter',sans-serif" onchange="saveTaxRate(this.value)">
+        </div>
+      </div>
+
+      <div class="inv-tabs">
+        <button class="inv-tab active" id="it-new" onclick="showInvTab('new')">Nouvelle facture</button>
+        <button class="inv-tab" id="it-list" onclick="showInvTab('list')">Historique</button>
+      </div>
+
+      <div class="inv-subpanel active" id="inv-new">
+        <div class="inv-wrap">
+          <div class="card">
+            <div class="card-title" style="margin-bottom:12px" id="inv-form-title">Détails de la facture</div>
+            <div class="pf">
+              <label id="il-num">Numéro de facture</label>
+              <div><span class="inv-num" id="inv-number-disp">NOV-2026-00000</span> <button class="btn btn-outline btn-sm" onclick="genInvoiceNumber()" id="il-regen">Régénérer</button></div>
+
+              <label id="il-resp" style="margin-top:12px">Lier à une réponse survey (optionnel)</label>
+              <select id="inv-response" onchange="prefillFromResponse()"><option value="" id="il-resp-none">— Sélection manuelle —</option></select>
+
+              <div class="inv-form-row">
+                <div><label id="il-name">Nom du client</label><input type="text" id="inv-name"></div>
+                <div><label id="il-biz">Compagnie du client</label><input type="text" id="inv-biz"></div>
+              </div>
+              <label id="il-email">Courriel du client</label><input type="email" id="inv-email" placeholder="client@exemple.com">
+
+              <label id="il-pkg" style="margin-top:12px">Forfait</label>
+              <select id="inv-pkg" onchange="onPkgChange()">
+                <option value="essential" id="ipkg-e">Essentiel — 2 500 $</option>
+                <option value="growth" id="ipkg-g">Croissance — 3 900 $</option>
+                <option value="full" id="ipkg-f">Complet — 6 200 $</option>
+                <option value="custom" id="ipkg-c">Personnalisé</option>
+              </select>
+
+              <label id="il-feats">Options incluses (cliquez pour sélectionner)</label>
+              <div class="opt-chips" id="inv-feat-chips"></div>
+
+              <div class="inv-form-row" style="margin-top:10px">
+                <div><label id="il-amount">Montant (avant taxes) $</label><input type="number" step="0.01" id="inv-amount" oninput="recalcInvoice()"></div>
+                <div><label id="il-freq">Fréquence</label>
+                  <select id="inv-freq" onchange="onFreqChange()">
+                    <option value="unique" id="ifreq-u">Paiement unique</option>
+                    <option value="mensuel" id="ifreq-m">Mensuel</option>
+                    <option value="hebdomadaire" id="ifreq-h">Hebdomadaire</option>
+                    <option value="annuel" id="ifreq-a">Annuel</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="inv-form-row" id="inv-installments-wrap" style="display:none">
+                <div><label id="il-count">Nombre de versements</label><input type="number" min="1" id="inv-count" value="1" oninput="recalcInvoice()"></div>
+                <div><label id="il-start">Date du 1er versement</label><input type="date" id="inv-start"></div>
+              </div>
+              <div class="inv-form-row" id="inv-due-wrap">
+                <div><label id="il-due">Date d'échéance</label><input type="date" id="inv-due"></div>
+                <div><label id="il-lang">Langue du document</label>
+                  <select id="inv-lang"><option value="fr" id="ilang-fr">Français</option><option value="en" id="ilang-en">English</option></select>
+                </div>
+              </div>
+
+              <label id="il-method" style="margin-top:12px">Type de paiement souhaité</label>
+              <select id="inv-method" onchange="onMethodChange()">
+                <option value="virement" id="imeth-v">Virement bancaire</option>
+                <option value="interac" id="imeth-i">Virement Interac</option>
+                <option value="carte" id="imeth-c">Carte de crédit</option>
+                <option value="cheque" id="imeth-ch">Chèque</option>
+                <option value="autre" id="imeth-a">Autre</option>
+              </select>
+              <div class="pay-fields">
+                <label id="il-details" style="margin-top:0">Coordonnées de paiement (courriel Interac, infos virement, etc.)</label>
+                <textarea id="inv-details" class="fld" style="width:100%;min-height:60px;padding:8px;border:1px solid var(--border);border-radius:7px;font-family:'Inter',sans-serif;font-size:.8rem"></textarea>
+              </div>
+
+              <div class="toggle-row" style="margin-top:14px;background:var(--brand-dim);padding:10px 12px;border-radius:8px">
+                <input type="checkbox" id="inv-contract" onchange="recalcInvoice()">
+                <label id="il-contract" style="font-weight:600">Document contractuel (ajoute les clauses et les blocs de signature)</label>
+              </div>
+
+              <label id="il-notes" style="margin-top:12px">Notes internes (n'apparaissent pas sur le PDF)</label>
+              <textarea id="inv-notes"></textarea>
+
+              <div class="card" style="margin-top:14px;background:var(--bg)">
+                <div class="calc-row"><span id="ic-sub">Sous-total</span><span id="ic-sub-val">0,00 $</span></div>
+                <div class="calc-row"><span id="ic-tax">Taxes</span><span id="ic-tax-val">0,00 $</span></div>
+                <div class="calc-row"><span id="ic-total">Total</span><span id="ic-total-val">0,00 $</span></div>
+              </div>
+
+              <div style="display:flex;gap:8px;margin-top:14px">
+                <button class="btn btn-outline" style="flex:1;justify-content:center" onclick="previewInvoicePDF()"><span id="ib-preview">Aperçu PDF</span></button>
+                <button class="btn btn-outline" style="flex:1;justify-content:center" onclick="downloadInvoicePDF()"><span id="ib-download">Télécharger</span></button>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <button class="btn btn-outline" style="flex:1;justify-content:center" onclick="generateEmailMessage()"><span id="ib-genmsg">Générer message courriel</span></button>
+                <button class="btn btn-brand" style="flex:1;justify-content:center" onclick="saveAndSendInvoice()"><span id="ib-send">Enregistrer + Envoyer (Resend)</span></button>
+              </div>
+              <div style="font-size:.7rem;color:var(--muted);margin-top:8px" id="ib-hint">« Générer message courriel » fonctionne dès maintenant, sans configuration. « Enregistrer + Envoyer » nécessite Resend + la base de données (voir README) — à activer plus tard.</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:10px" id="ct-inv-preview">Aperçu PDF</div>
+            <iframe class="pdf-preview-frame" id="inv-pdf-frame"></iframe>
+            <div class="card-title" style="margin:16px 0 10px" id="ct-email-msg">Message courriel (à copier-coller manuellement)</div>
+            <textarea id="inv-email-text" class="fld" style="width:100%;min-height:180px;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.8rem" readonly placeholder="Clique sur « Générer message courriel » à gauche."></textarea>
+            <button class="btn btn-outline" style="margin-top:8px;width:100%;justify-content:center" onclick="copyEmailMessage()"><span id="ib-copymsg">Copier le message</span></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="inv-subpanel" id="inv-list">
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title" id="ct-inv-list">Historique des factures</div></div>
+          </div>
+          <div class="inv-list" id="invoices-list"><div class="empty-state" id="inv-empty">Aucune facture pour le moment.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SURVEY BUILDER -->
+    <div class="panel" id="panel-survey">
+      <div class="inv-wrap">
+        <div>
+          <div class="card-head" style="margin-bottom:10px">
+            <div><div class="card-title" id="sv-title">Étapes du questionnaire</div><div class="card-sub" id="sv-sub">Modifiez, réordonnez ou ajoutez des questions — le survey public se met à jour instantanément.</div></div>
+            <button class="btn btn-brand btn-sm" onclick="addNewStep()"><span id="sv-add-step">+ Nouvelle étape</span></button>
+          </div>
+          <div id="sv-steps-list"></div>
+        </div>
+        <div class="sv-editor" id="sv-editor">
+          <div class="empty-state" id="sv-editor-empty">Sélectionnez une question à gauche pour la modifier, ou créez-en une nouvelle.</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+
+</div><!-- /app-root -->
 
 <!-- TOAST NOTIFICATION -->
 <div class="notif-toast" id="toast">
@@ -384,7 +621,7 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let LANG = 'fr';
 const T = {
   fr: {
-    panels:{ reponses:'Réponses Survey', pipeline:'Pipeline Clients', propose:'Générer un Devis', insights:'Insights' },
+    panels:{ reponses:'Réponses Survey', pipeline:'Pipeline Clients', propose:'Générer un Devis', insights:'Insights', factures:'Facturation', survey:'Constructeur de Survey' },
     responses:'Soumissions reçues', responses_sub:'Cliquez sur une réponse pour voir les détails et la traduction',
     refresh:'Actualiser', live:'● Temps réel', connecting:'○ Connexion...',
     new:'Nouveau', seen:'Consulté', proposal:'Devis envoyé', won:'Signé',
@@ -427,7 +664,7 @@ const T = {
     feat_names:{feat_chatbot:'Chatbot IA',feat_quote:'Formulaire devis',feat_portal:'Portail client',feat_payment:'Paiement en ligne',feat_automation:'Automation',feat_seo:'SEO',feat_booking:'Réservation',feat_live_chat:'Chat live'}
   },
   en: {
-    panels:{ reponses:'Survey Responses', pipeline:'Client Pipeline', propose:'Generate Quote', insights:'Insights' },
+    panels:{ reponses:'Survey Responses', pipeline:'Client Pipeline', propose:'Generate Quote', insights:'Insights', factures:'Invoicing', survey:'Survey Builder' },
     responses:'All submissions', responses_sub:'Click a response to see details and translation',
     refresh:'Refresh', live:'● Live', connecting:'○ Connecting...',
     new:'New', seen:'Reviewed', proposal:'Quote Sent', won:'Won',
@@ -491,6 +728,10 @@ function applyLang(){
   document.getElementById('t-pipeline').textContent = L.panels.pipeline;
   document.getElementById('t-devis').textContent = L.panels.propose;
   document.getElementById('t-insights').textContent = L.panels.insights;
+  document.getElementById('t-factures').textContent = L.panels.factures;
+  document.getElementById('t-survey').textContent = L.panels.survey;
+  document.getElementById('sb-admin').textContent = LANG==='fr'?'Admin':'Admin';
+  applyExtraLang();
   // Cards
   document.getElementById('ct-responses').textContent = L.responses;
   document.getElementById('cs-responses').textContent = L.responses_sub;
@@ -546,7 +787,7 @@ async function translateFree(text){
   const key = text.substring(0,40);
   if(transCache[key]) return transCache[key];
   try {
-    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text.substring(0,500))}&langpair=en|fr&de=novaris@contact.ca`;
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text.substring(0,500))}&langpair=en|fr&de=contact@novaris-solution.com`;
     const r = await fetch(url);
     const d = await r.json();
     const result = d?.responseData?.translatedText || text;
@@ -588,6 +829,7 @@ async function loadAll(){
   allData = data || [];
   updateMetrics();
   renderList();
+  if(typeof populateResponseDropdown === 'function') populateResponseDropdown();
 }
 
 // ── REALTIME ──
@@ -598,6 +840,7 @@ sb.channel('novaris_survey')
     renderList();
     showToast(`${t('toast_new')} ${p.new.contact_name||'—'} (${p.new.business_name||''})`);
     document.getElementById('nb-new').textContent = allData.filter(r=>r.status==='new').length;
+    if(typeof populateResponseDropdown === 'function') populateResponseDropdown();
   })
   .subscribe(s => {
     const b = document.getElementById('live-badge');
@@ -699,21 +942,8 @@ function renderList(){
           <div class="feat-wrap">${feats||`<span style="color:var(--muted);font-size:.73rem">—</span>`}</div>
         </div>
         <div class="det-section">
-          <div class="det-label">DETAILS</div>
-          <div class="det-grid">
-            <div class="det-item"><div class="dl">${L.det_email}</div><div class="dv">${r.email||'—'}</div></div>
-            <div class="det-item"><div class="dl">${L.det_phone}</div><div class="dv">${r.phone||'—'}</div></div>
-            <div class="det-item"><div class="dl">${L.det_team}</div><div class="dv">${r.team_size||'—'}</div></div>
-            <div class="det-item"><div class="dl">${L.det_years}</div><div class="dv">${r.years_in_business||'—'}</div></div>
-            <div class="det-item"><div class="dl">${L.det_mrr}</div><div class="dv">${r.current_mrr||'—'}</div></div>
-            <div class="det-item"><div class="dl">${L.det_target}</div><div class="dv">${r.revenue_target_display||'—'}</div></div>
-            <div class="det-item"><div class="dl">${L.det_timeline}</div><div class="dv">${r.timeline||'—'}</div></div>
-            <div class="det-item"><div class="dl">${L.det_phased}</div><div class="dv">${r.phased||'—'}</div></div>
-            <div class="det-item"><div class="dl">${L.det_quote}</div><div class="dv">${r.quote_method||'—'}</div></div>
-            <div class="det-item"><div class="dl">${L.det_response}</div><div class="dv">${r.response_time||'—'}</div></div>
-            <div class="det-item"><div class="dl">${L.det_website}</div><div class="dv">${r.has_website||'—'}</div></div>
-            <div class="det-item"><div class="dl">${L.det_assets}</div><div class="dv">${r.assets||'—'}</div></div>
-          </div>
+          <div class="det-label">${LANG==='fr'?'TOUTES LES RÉPONSES DU SURVEY':'ALL SURVEY ANSWERS'}</div>
+          ${renderAllAnswers(r)}
         </div>
         <div class="act-row">
           <button class="btn btn-brand btn-sm" onclick="markSeen('${r.id}',${i})">${L.mark_seen}</button>
@@ -791,8 +1021,8 @@ function genProposal(){
   const today = new Date().toLocaleDateString(LANG==='fr'?'fr-CA':'en-CA',{year:'numeric',month:'long',day:'numeric'});
   const sep = '──────────────────────────────';
   const text = LANG==='fr'
-    ? `${L.proposal_subject} ${biz}\n\n${L.proposal_hi} ${name},\n\n${L.proposal_thanks} ${biz}.\n\n${note?note+'\n\n':''}${sep}\nPROPOSITION — ${today}\nClient : ${name} / ${biz}\n${L.proposal_pkg} : ${p.n}\n${L.proposal_invest} : ${p.n === 'Personnalisé' ? price||'À définir' : p.p}${monthly?'\n'+L.proposal_monthly_opt+' : '+monthly:''}\n${L.proposal_delay} : ${timeline}\n\n${L.proposal_features} :\n${feats.map(f=>'  ✓ '+f).join('\n')}\n  ✓ ${L.proposal_support}\n  ✓ ${L.proposal_revision}\n  ✓ ${L.proposal_ownership}\n${sep}\n\n${L.proposal_why} :\n${feats.length?'Vos priorités ('+feats.slice(0,2).join(', ')+') sont entièrement couvertes.':''}\n\nNovaris Technologies accompagne ${biz} sur le long terme — pas seulement pour ce projet.\n\n${L.proposal_steps} :\n1. ${L.proposal_s1}\n2. ${L.proposal_s2}\n3. ${L.proposal_s3}\n\n${L.proposal_closing}\n\nPatrick Essono\n${L.proposal_title}\nNovaris Technologies Inc.\np_essono@hotmail.com`
-    : `${L.proposal_subject} ${biz}\n\nHi ${name},\n\n${L.proposal_thanks} ${biz}.\n\n${note?note+'\n\n':''}${sep}\nPROPOSAL — ${today}\nClient: ${name} / ${biz}\n${L.proposal_pkg}: ${p.n}\n${L.proposal_invest}: ${p.p}${monthly?'\n'+L.proposal_monthly_opt+': '+monthly:''}\n${L.proposal_delay}: ${timeline}\n\n${L.proposal_features}:\n${feats.map(f=>'  ✓ '+f).join('\n')}\n  ✓ ${L.proposal_support}\n  ✓ ${L.proposal_revision}\n  ✓ ${L.proposal_ownership}\n${sep}\n\n${L.proposal_why}:\n${feats.length?'Your priorities ('+feats.slice(0,2).join(', ')+') are fully covered.':''}\n\nNovaris Technologies is your long-term partner — not just for this project.\n\n${L.proposal_steps}:\n1. ${L.proposal_s1}\n2. ${L.proposal_s2}\n3. ${L.proposal_s3}\n\n${L.proposal_closing}\n\nPatrick Essono\n${L.proposal_title}\nNovaris Technologies Inc.\np_essono@hotmail.com`;
+    ? `${L.proposal_subject} ${biz}\n\n${L.proposal_hi} ${name},\n\n${L.proposal_thanks} ${biz}.\n\n${note?note+'\n\n':''}${sep}\nPROPOSITION — ${today}\nClient : ${name} / ${biz}\n${L.proposal_pkg} : ${p.n}\n${L.proposal_invest} : ${p.n === 'Personnalisé' ? price||'À définir' : p.p}${monthly?'\n'+L.proposal_monthly_opt+' : '+monthly:''}\n${L.proposal_delay} : ${timeline}\n\n${L.proposal_features} :\n${feats.map(f=>'  ✓ '+f).join('\n')}\n  ✓ ${L.proposal_support}\n  ✓ ${L.proposal_revision}\n  ✓ ${L.proposal_ownership}\n${sep}\n\n${L.proposal_why} :\n${feats.length?'Vos priorités ('+feats.slice(0,2).join(', ')+') sont entièrement couvertes.':''}\n\nNovaris Solution accompagne ${biz} sur le long terme — pas seulement pour ce projet.\n\n${L.proposal_steps} :\n1. ${L.proposal_s1}\n2. ${L.proposal_s2}\n3. ${L.proposal_s3}\n\n${L.proposal_closing}\n\nPatrick Essono\n${L.proposal_title}\nNovaris Solution Inc.\np_essono@hotmail.com`
+    : `${L.proposal_subject} ${biz}\n\nHi ${name},\n\n${L.proposal_thanks} ${biz}.\n\n${note?note+'\n\n':''}${sep}\nPROPOSAL — ${today}\nClient: ${name} / ${biz}\n${L.proposal_pkg}: ${p.n}\n${L.proposal_invest}: ${p.p}${monthly?'\n'+L.proposal_monthly_opt+': '+monthly:''}\n${L.proposal_delay}: ${timeline}\n\n${L.proposal_features}:\n${feats.map(f=>'  ✓ '+f).join('\n')}\n  ✓ ${L.proposal_support}\n  ✓ ${L.proposal_revision}\n  ✓ ${L.proposal_ownership}\n${sep}\n\n${L.proposal_why}:\n${feats.length?'Your priorities ('+feats.slice(0,2).join(', ')+') are fully covered.':''}\n\nNovaris Solution is your long-term partner — not just for this project.\n\n${L.proposal_steps}:\n1. ${L.proposal_s1}\n2. ${L.proposal_s2}\n3. ${L.proposal_s3}\n\n${L.proposal_closing}\n\nPatrick Essono\n${L.proposal_title}\nNovaris Solution Inc.\np_essono@hotmail.com`;
   document.getElementById('prop-out').textContent = text;
 }
 
@@ -840,21 +1070,801 @@ function renderInsights(){
   document.getElementById('pain-chart').innerHTML=sp2.map(([k,v])=>`<div class="bar-item"><div class="bar-lrow"><span class="bl">${k}</span><span>${v}</span></div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/mp*100)}%;background:var(--red)"></div></div></div>`).join('');
 }
 
-const PANEL_TITLES = {reponses:0, pipeline:1, propose:2, insights:3};
 function showP(id, el){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
   el.classList.add('active');
   document.getElementById('panel-title').textContent = T[LANG].panels[id];
-  document.getElementById('panel-sub').textContent = id==='reponses'?'Shining Legacy — Danielle':'Novaris Technologies Inc.';
+  document.getElementById('panel-sub').textContent = id==='reponses'?(LANG==='fr'?'Toutes les soumissions':'All submissions'):'Novaris Solution Inc.';
   if(id==='insights'){renderInsights();}
   if(id==='pipeline'){renderPipeline();}
+  if(id==='factures'){renderFinMetrics();renderInvoicesList();}
+  if(id==='survey'){renderSurveyBuilder();}
+}
+function showInvTab(id){
+  document.getElementById('it-new').classList.toggle('active', id==='new');
+  document.getElementById('it-list').classList.toggle('active', id==='list');
+  document.getElementById('inv-new').classList.toggle('active', id==='new');
+  document.getElementById('inv-list').classList.toggle('active', id==='list');
+  if(id==='list') renderInvoicesList();
+}
+
+// ══════════════════════════════════════════════════════════
+// EXTRA I18N — labels des nouveaux écrans (Factures / Survey / Login)
+// ══════════════════════════════════════════════════════════
+const EXTRA_I18N = {
+  'login-title':{fr:'Novaris Solution',en:'Novaris Solution'},
+  'login-sub':{fr:'Connexion au dashboard client',en:'Client dashboard login'},
+  'login-lbl-email':{fr:'Courriel',en:'Email'},
+  'login-lbl-pass':{fr:'Mot de passe',en:'Password'},
+  'login-btn':{fr:'Se connecter',en:'Sign in'},
+  'fm-lbl-1':{fr:'Montant conclu',en:'Contracted amount'},
+  'fm-sub-1':{fr:'Total facturé',en:'Total invoiced'},
+  'fm-lbl-2':{fr:'Mensualités payées',en:'Installments paid'},
+  'fm-sub-2':{fr:'Encaissé',en:'Collected'},
+  'fm-lbl-3':{fr:'Mensualités à payer',en:'Installments due'},
+  'fm-sub-3':{fr:'En attente',en:'Outstanding'},
+  'fm-lbl-4':{fr:'Montant net',en:'Net amount'},
+  'fm-sub-4':{fr:'Après impôts estimés',en:'After estimated tax'},
+  'fm-tax-lbl':{fr:'Impôts estimés à provisionner (sur montant encaissé)',en:'Estimated tax to set aside (on amount collected)'},
+  'fm-rate-lbl':{fr:'Taux de taxe / provision (%)',en:'Tax / provision rate (%)'},
+  'it-new':{fr:'Nouvelle facture',en:'New invoice'},
+  'it-list':{fr:'Historique',en:'History'},
+  'inv-form-title':{fr:'Détails de la facture',en:'Invoice details'},
+  'il-num':{fr:'Numéro de facture',en:'Invoice number'},
+  'il-regen':{fr:'Régénérer',en:'Regenerate'},
+  'il-resp':{fr:'Lier à une réponse survey (optionnel)',en:'Link to a survey response (optional)'},
+  'il-resp-none':{fr:'— Sélection manuelle —',en:'— Manual entry —'},
+  'il-name':{fr:'Nom du client',en:'Client name'},
+  'il-biz':{fr:'Compagnie du client',en:'Client company'},
+  'il-email':{fr:'Courriel du client',en:'Client email'},
+  'il-pkg':{fr:'Forfait',en:'Package'},
+  'ipkg-e':{fr:'Essentiel — 2 500 $',en:'Essential — $2,500'},
+  'ipkg-g':{fr:'Croissance — 3 900 $',en:'Growth — $3,900'},
+  'ipkg-f':{fr:'Complet — 6 200 $',en:'Full Suite — $6,200'},
+  'ipkg-c':{fr:'Personnalisé',en:'Custom'},
+  'il-feats':{fr:'Options incluses (cliquez pour sélectionner)',en:'Included options (click to select)'},
+  'il-amount':{fr:'Montant (avant taxes) $',en:'Amount (before tax) $'},
+  'il-freq':{fr:'Fréquence',en:'Frequency'},
+  'ifreq-u':{fr:'Paiement unique',en:'One-time payment'},
+  'ifreq-m':{fr:'Mensuel',en:'Monthly'},
+  'ifreq-h':{fr:'Hebdomadaire',en:'Weekly'},
+  'ifreq-a':{fr:'Annuel',en:'Yearly'},
+  'il-count':{fr:'Nombre de versements',en:'Number of installments'},
+  'il-start':{fr:'Date du 1er versement',en:'First installment date'},
+  'il-due':{fr:"Date d'échéance",en:'Due date'},
+  'il-lang':{fr:'Langue du document',en:'Document language'},
+  'ilang-fr':{fr:'Français',en:'French'},
+  'ilang-en':{fr:'English',en:'English'},
+  'il-method':{fr:'Type de paiement souhaité',en:'Preferred payment method'},
+  'imeth-v':{fr:'Virement bancaire',en:'Bank transfer'},
+  'imeth-i':{fr:'Virement Interac',en:'Interac e-Transfer'},
+  'imeth-c':{fr:'Carte de crédit',en:'Credit card'},
+  'imeth-ch':{fr:'Chèque',en:'Cheque'},
+  'imeth-a':{fr:'Autre',en:'Other'},
+  'il-details':{fr:'Coordonnées de paiement (courriel Interac, infos virement, etc.)',en:'Payment details (Interac email, bank info, etc.)'},
+  'il-notes':{fr:"Notes internes (n'apparaissent pas sur le PDF)",en:'Internal notes (not shown on the PDF)'},
+  'ic-sub':{fr:'Sous-total',en:'Subtotal'},
+  'ic-tax':{fr:'Taxes',en:'Tax'},
+  'ic-total':{fr:'Total',en:'Total'},
+  'ib-preview':{fr:'Aperçu PDF',en:'Preview PDF'},
+  'ib-download':{fr:'Télécharger',en:'Download'},
+  'ib-send':{fr:'Enregistrer + Envoyer (Resend)',en:'Save + Send (Resend)'},
+  'ib-hint':{fr:'« Générer message courriel » fonctionne dès maintenant, sans configuration. « Enregistrer + Envoyer » nécessite Resend + la base de données (voir README) — à activer plus tard.',en:'"Generate email message" works right now, no setup needed. "Save + Send" requires Resend + the database (see README) — to enable later.'},
+  'il-contract':{fr:'Document contractuel (ajoute les clauses et les blocs de signature)',en:'Contract document (adds clauses and signature blocks)'},
+  'ib-genmsg':{fr:'Générer message courriel',en:'Generate email message'},
+  'ib-copymsg':{fr:'Copier le message',en:'Copy message'},
+  'ct-email-msg':{fr:'Message courriel (à copier-coller manuellement)',en:'Email message (to copy-paste manually)'},
+  'ct-inv-preview':{fr:'Aperçu PDF',en:'PDF preview'},
+  'ct-inv-list':{fr:'Historique des factures',en:'Invoice history'},
+  'inv-empty':{fr:'Aucune facture pour le moment.',en:'No invoices yet.'},
+  'sv-title':{fr:'Étapes du questionnaire',en:'Survey steps'},
+  'sv-sub':{fr:'Modifiez, réordonnez ou ajoutez des questions — le survey public se met à jour instantanément.',en:'Edit, reorder or add questions — the public survey updates instantly.'},
+  'sv-add-step':{fr:'+ Nouvelle étape',en:'+ New step'},
+  'sv-editor-empty':{fr:'Sélectionnez une question à gauche pour la modifier, ou créez-en une nouvelle.',en:'Select a question on the left to edit it, or create a new one.'}
+};
+function applyExtraLang(){
+  Object.keys(EXTRA_I18N).forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.textContent = EXTRA_I18N[id][LANG];
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// AUTHENTIFICATION (Supabase Auth) — protège les données clients/factures
+// ══════════════════════════════════════════════════════════
+async function doLogin(){
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-err');
+  err.classList.remove('show');
+  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if(error){
+    err.textContent = LANG==='fr' ? "Identifiants invalides." : "Invalid credentials.";
+    err.classList.add('show');
+    return;
+  }
+  boot();
+}
+async function checkAuth(){
+  const { data } = await sb.auth.getSession();
+  if(data.session){ boot(); }
+  else { document.getElementById('login-wrap').classList.remove('hidden'); document.getElementById('app-root').classList.add('hidden'); }
+}
+function boot(){
+  document.getElementById('login-wrap').classList.add('hidden');
+  document.getElementById('app-root').classList.remove('hidden');
+  applyLang();
+  loadAll();
+  loadSettings();
+  loadInvoices();
+  loadSurveyConfig();
+}
+
+// ══════════════════════════════════════════════════════════
+// PARAMÈTRES (taux de taxe, coordonnées de paiement par défaut)
+// ══════════════════════════════════════════════════════════
+let appSettings = { tax_rate:14.975, default_interac_email:'', default_bank_info:'', company_name:'Novaris Solution Inc.', company_address:'226 rue Rouville, Longueuil, Québec J4K 2W2', company_email:'p_essono@hotmail.com' };
+async function loadSettings(){
+  const { data } = await sb.from('app_settings').select('*').eq('id',1).maybeSingle();
+  if(data) appSettings = data;
+  document.getElementById('tax-rate-input').value = appSettings.tax_rate;
+}
+async function saveTaxRate(v){
+  appSettings.tax_rate = parseFloat(v)||0;
+  await sb.from('app_settings').update({tax_rate:appSettings.tax_rate}).eq('id',1);
+  recalcInvoice(); renderFinMetrics();
+}
+
+// ══════════════════════════════════════════════════════════
+// FACTURATION
+// ══════════════════════════════════════════════════════════
+let allInvoices = [];
+const INV_PKG = {
+  essential:{amount:2500, feats:['feat_chatbot','feat_seo']},
+  growth:{amount:3900, feats:['feat_chatbot','feat_seo','feat_automation','feat_booking']},
+  full:{amount:6200, feats:['feat_chatbot','feat_seo','feat_automation','feat_booking','feat_portal','feat_payment']},
+  custom:{amount:0, feats:[]}
+};
+const ALL_FEAT_OPTIONS = [
+  {key:'feat_chatbot', fr:'Chatbot IA (24/7)', en:'AI Chatbot (24/7)'},
+  {key:'feat_quote', fr:'Formulaire de devis instantané', en:'Instant quote form'},
+  {key:'feat_portal', fr:'Portail client', en:'Client portal'},
+  {key:'feat_payment', fr:'Paiement en ligne', en:'Online payment'},
+  {key:'feat_automation', fr:'Automatisation courriels', en:'Email automation'},
+  {key:'feat_seo', fr:'SEO local', en:'Local SEO'},
+  {key:'feat_booking', fr:'Réservation en ligne', en:'Online booking'},
+  {key:'dashboard', fr:'Dashboard analytique', en:'Analytics dashboard'},
+  {key:'hosting', fr:'Hébergement inclus (1 an)', en:'Hosting included (1 yr)'},
+  {key:'maintenance', fr:'Maintenance mensuelle', en:'Monthly maintenance'}
+];
+let selectedFeats = new Set();
+
+function genInvoiceNumber(){
+  const year = new Date().getFullYear();
+  const rand = Math.floor(10000 + Math.random()*89999);
+  document.getElementById('inv-number-disp').textContent = `NOV-${year}-${rand}`;
+}
+
+function renderFeatChips(){
+  const wrap = document.getElementById('inv-feat-chips');
+  wrap.innerHTML = ALL_FEAT_OPTIONS.map(f=>`<span class="chip ${selectedFeats.has(f.key)?'sel':''}" onclick="toggleFeat('${f.key}')">${LANG==='fr'?f.fr:f.en}</span>`).join('');
+}
+function toggleFeat(key){
+  if(selectedFeats.has(key)) selectedFeats.delete(key); else selectedFeats.add(key);
+  renderFeatChips();
+}
+
+function onPkgChange(){
+  const pkg = document.getElementById('inv-pkg').value;
+  const def = INV_PKG[pkg];
+  document.getElementById('inv-amount').value = def.amount || '';
+  selectedFeats = new Set(def.feats);
+  renderFeatChips();
+  recalcInvoice();
+}
+function onFreqChange(){
+  const freq = document.getElementById('inv-freq').value;
+  document.getElementById('inv-installments-wrap').style.display = freq==='unique' ? 'none' : 'grid';
+  recalcInvoice();
+}
+function onMethodChange(){
+  const m = document.getElementById('inv-method').value;
+  const box = document.getElementById('inv-details');
+  if(!box.value.trim()){
+    if(m==='interac' && appSettings.default_interac_email) box.value = appSettings.default_interac_email;
+    if(m==='virement' && appSettings.default_bank_info) box.value = appSettings.default_bank_info;
+  }
+}
+
+function recalcInvoice(){
+  const amount = parseFloat(document.getElementById('inv-amount').value)||0;
+  const rate = appSettings.tax_rate||0;
+  const tax = +(amount*rate/100).toFixed(2);
+  const total = +(amount+tax).toFixed(2);
+  document.getElementById('ic-sub-val').textContent = fmtMoney(amount);
+  document.getElementById('ic-tax-val').textContent = fmtMoney(tax) + ` (${rate}%)`;
+  document.getElementById('ic-total-val').textContent = fmtMoney(total);
+  return {amount, tax, total};
+}
+function fmtMoney(n){
+  return (LANG==='fr' ? n.toLocaleString('fr-CA',{minimumFractionDigits:2,maximumFractionDigits:2})+' $' : '$'+n.toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2}));
+}
+
+function prefillFromResponse(){
+  const idx = document.getElementById('inv-response').value;
+  if(idx==='') return;
+  const r = allData[idx];
+  document.getElementById('inv-name').value = r.contact_name||'';
+  document.getElementById('inv-biz').value = r.business_name||'';
+  document.getElementById('inv-email').value = r.email||'';
+}
+
+function populateResponseDropdown(){
+  const sel = document.getElementById('inv-response');
+  const cur = sel.value;
+  sel.innerHTML = `<option value="" id="il-resp-none">${LANG==='fr'?'— Sélection manuelle —':'— Manual entry —'}</option>` +
+    allData.map((r,i)=>`<option value="${i}">${r.contact_name||'—'} · ${r.business_name||'—'}</option>`).join('');
+  sel.value = cur;
+}
+
+function buildInvoiceObject(){
+  const {amount, tax, total} = recalcInvoice();
+  const freq = document.getElementById('inv-freq').value;
+  const count = freq==='unique' ? 1 : (parseInt(document.getElementById('inv-count').value)||1);
+  return {
+    invoice_number: document.getElementById('inv-number-disp').textContent,
+    response_id: document.getElementById('inv-response').value!=='' ? allData[document.getElementById('inv-response').value].id : null,
+    client_name: document.getElementById('inv-name').value,
+    client_business: document.getElementById('inv-biz').value,
+    client_email: document.getElementById('inv-email').value,
+    lang: document.getElementById('inv-lang').value,
+    package_key: document.getElementById('inv-pkg').value,
+    package_label: document.getElementById('inv-pkg').selectedOptions[0].textContent,
+    features: Array.from(selectedFeats).map(k=>{
+      const f = ALL_FEAT_OPTIONS.find(x=>x.key===k);
+      return f ? (LANG==='fr'?f.fr:f.en) : k;
+    }),
+    amount, tax_rate: appSettings.tax_rate||0, tax_amount: tax, total_amount: total,
+    payment_method: document.getElementById('inv-method').value,
+    payment_details: document.getElementById('inv-details').value,
+    frequency: freq,
+    installments_count: count,
+    due_date: document.getElementById('inv-due').value || null,
+    notes: document.getElementById('inv-notes').value,
+    include_contract: document.getElementById('inv-contract').checked,
+    status: 'draft'
+  };
+}
+
+function invoiceHTMLDoc(inv){
+  const isFr = inv.lang==='fr';
+  const L = isFr ? {
+    facture:'FACTURE', num:'N° de facture', date:'Date', client:'Client', compagnie:'Compagnie',
+    details:'DÉTAIL DU FORFAIT', desc:'Description', montant:'Montant', sousTotal:'Sous-total',
+    taxes:'Taxes', total:'Total', paiement:'MODALITÉS DE PAIEMENT', methode:'Type de paiement',
+    coord:'Coordonnées', freq:'Fréquence', echeance:"Date d'échéance", versements:'Nombre de versements',
+    merci: appSettings.invoice_footer_fr || 'Merci de votre confiance.'
+  } : {
+    facture:'INVOICE', num:'Invoice #', date:'Date', client:'Client', compagnie:'Company',
+    details:'PACKAGE DETAILS', desc:'Description', montant:'Amount', sousTotal:'Subtotal',
+    taxes:'Tax', total:'Total', paiement:'PAYMENT TERMS', methode:'Payment method',
+    coord:'Details', freq:'Frequency', echeance:'Due date', versements:'Number of installments',
+    merci: appSettings.invoice_footer_en || 'Thank you for your business.'
+  };
+  const freqLabels = isFr
+    ? {unique:'Paiement unique', mensuel:'Mensuel', hebdomadaire:'Hebdomadaire', annuel:'Annuel'}
+    : {unique:'One-time', mensuel:'Monthly', hebdomadaire:'Weekly', annuel:'Yearly'};
+  const methLabels = isFr
+    ? {virement:'Virement bancaire', interac:'Virement Interac', carte:'Carte de crédit', cheque:'Chèque', autre:'Autre'}
+    : {virement:'Bank transfer', interac:'Interac e-Transfer', carte:'Credit card', cheque:'Cheque', autre:'Other'};
+  const today = new Date().toLocaleDateString(isFr?'fr-CA':'en-CA',{year:'numeric',month:'long',day:'numeric'});
+  return { L, freqLabels, methLabels, today };
+}
+
+function generateInvoicePDF(inv){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'pt', format:'letter'});
+  const { L, freqLabels, methLabels, today } = invoiceHTMLDoc(inv);
+  const brand = [108,63,197]; const navy=[15,23,42]; const muted=[100,116,139];
+  let y = 50;
+
+  // En-tête
+  doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(...navy);
+  doc.text('NOVARIS SOLUTION', 50, y);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...muted);
+  y += 16; doc.text('Patrick Essono', 50, y);
+  y += 13; doc.text(appSettings.company_address || '226 rue Rouville, Longueuil, Québec J4K 2W2', 50, y);
+  y += 13; doc.text(appSettings.company_email || 'p_essono@hotmail.com', 50, y);
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(20); doc.setTextColor(...brand);
+  doc.text(L.facture, 545, 55, {align:'right'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...muted);
+  doc.text(`${L.num}: ${inv.invoice_number}`, 545, 74, {align:'right'});
+  doc.text(`${L.date}: ${today}`, 545, 87, {align:'right'});
+
+  y = 130;
+  doc.setDrawColor(226,232,240); doc.line(50,y,545,y);
+  y += 22;
+
+  // Client
+  doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(...navy);
+  doc.text(L.client.toUpperCase(), 50, y);
+  y += 15; doc.setFont('helvetica','normal'); doc.setFontSize(10.5);
+  doc.text(inv.client_name || '—', 50, y);
+  y += 14; doc.setFontSize(9.5); doc.setTextColor(...muted);
+  doc.text(inv.client_business || '—', 50, y);
+  if(inv.client_email){ y += 14; doc.text(inv.client_email, 50, y); }
+
+  y += 30;
+  // Détail du forfait
+  doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(...navy);
+  doc.text(L.details, 50, y);
+  y += 10;
+  doc.setFillColor(248,250,252); doc.rect(50, y, 495, 22, 'F');
+  doc.setFontSize(9); doc.setTextColor(...muted);
+  doc.text(L.desc, 58, y+15);
+  doc.text(L.montant, 530, y+15, {align:'right'});
+  y += 22;
+  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(...navy);
+  doc.text(inv.package_label || '—', 58, y+16);
+  doc.text(fmtMoney2(inv.amount, inv.lang), 530, y+16, {align:'right'});
+  y += 20;
+  (inv.features||[]).forEach(f=>{
+    doc.setFontSize(9); doc.setTextColor(...muted);
+    doc.text('•  '+f, 66, y+10);
+    y += 16;
+  });
+  y += 10;
+  doc.setDrawColor(226,232,240); doc.line(50,y,545,y);
+  y += 6;
+
+  // Totaux
+  const totalsX = 380;
+  y += 16; doc.setFontSize(9.5); doc.setTextColor(...muted);
+  doc.text(L.sousTotal, totalsX, y); doc.text(fmtMoney2(inv.amount, inv.lang), 545, y, {align:'right'});
+  y += 16; doc.text(`${L.taxes} (${inv.tax_rate}%)`, totalsX, y); doc.text(fmtMoney2(inv.tax_amount, inv.lang), 545, y, {align:'right'});
+  y += 18; doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(...brand);
+  doc.text(L.total, totalsX, y); doc.text(fmtMoney2(inv.total_amount, inv.lang), 545, y, {align:'right'});
+
+  y += 34;
+  doc.setDrawColor(226,232,240); doc.line(50,y,545,y);
+  y += 22;
+
+  // Paiement
+  doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(...navy);
+  doc.text(L.paiement, 50, y);
+  y += 16; doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(...muted);
+  doc.text(`${L.methode}: `, 50, y); doc.setTextColor(...navy); doc.text(methLabels[inv.payment_method]||inv.payment_method, 140, y);
+  y += 15; doc.setTextColor(...muted); doc.text(`${L.freq}: `, 50, y); doc.setTextColor(...navy); doc.text(freqLabels[inv.frequency]||inv.frequency, 140, y);
+  if(inv.frequency !== 'unique'){
+    y += 15; doc.setTextColor(...muted); doc.text(`${L.versements}: `, 50, y); doc.setTextColor(...navy); doc.text(String(inv.installments_count), 140, y);
+  }
+  if(inv.due_date){
+    y += 15; doc.setTextColor(...muted); doc.text(`${L.echeance}: `, 50, y); doc.setTextColor(...navy); doc.text(inv.due_date, 140, y);
+  }
+  if(inv.payment_details){
+    y += 20;
+    doc.setTextColor(...muted); doc.text(`${L.coord}:`, 50, y);
+    y += 14;
+    const lines = doc.splitTextToSize(inv.payment_details, 495);
+    doc.setTextColor(...navy);
+    doc.text(lines, 50, y);
+    y += lines.length*13;
+  }
+
+  // Clauses contractuelles + signatures (si le document est généré comme contrat)
+  if(inv.include_contract){
+    const CLAUSES = inv.lang==='fr' ? {
+      title:'CONDITIONS CONTRACTUELLES',
+      items:[
+        'Portée du mandat — Ce document confirme le mandat décrit dans le détail du forfait ci-dessus, incluant toutes les options énumérées.',
+        'Propriété — Une fois le paiement complété, le client détient la pleine propriété du code source et du nom de domaine livrés.',
+        'Révisions — Une (1) ronde de révisions est incluse après la livraison initiale.',
+        'Support — Un support de 30 jours suivant le lancement est inclus.',
+        'Modalités de paiement — Selon les modalités décrites à la section « Modalités de paiement » ci-dessus.'
+      ],
+      accept:'En signant ci-dessous, les deux parties acceptent les termes du présent contrat.',
+      clientSig:'Signature du client', novarisSig:'Novaris Solution Inc.', date:'Date'
+    } : {
+      title:'CONTRACT TERMS',
+      items:[
+        'Scope of work — This document confirms the mandate described in the package details above, including all listed options.',
+        'Ownership — Once payment is completed, the client holds full ownership of the delivered source code and domain name.',
+        'Revisions — One (1) round of revisions is included after initial delivery.',
+        'Support — 30 days of post-launch support is included.',
+        'Payment terms — As described in the "Payment Terms" section above.'
+      ],
+      accept:'By signing below, both parties accept the terms of this contract.',
+      clientSig:'Client signature', novarisSig:'Novaris Solution Inc.', date:'Date'
+    };
+    if(y > 620){ doc.addPage(); y = 50; } else { y += 30; }
+    doc.setDrawColor(226,232,240); doc.line(50,y,545,y);
+    y += 22;
+    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(...navy);
+    doc.text(CLAUSES.title, 50, y);
+    y += 16;
+    CLAUSES.items.forEach((item,idx)=>{
+      const lines = doc.splitTextToSize(`${idx+1}. ${item}`, 495);
+      if(y + lines.length*13 > 730){ doc.addPage(); y = 50; }
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...muted);
+      doc.text(lines, 50, y);
+      y += lines.length*13 + 5;
+    });
+    y += 10;
+    if(y > 700){ doc.addPage(); y = 50; }
+    doc.setFont('helvetica','italic'); doc.setFontSize(9); doc.setTextColor(...navy);
+    doc.text(CLAUSES.accept, 50, y);
+    y += 50;
+    if(y > 700){ doc.addPage(); y = 50; }
+    doc.setDrawColor(148,163,184);
+    doc.line(50, y, 260, y); doc.line(335, y, 545, y);
+    y += 14;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...muted);
+    doc.text(CLAUSES.clientSig, 50, y); doc.text(CLAUSES.novarisSig, 335, y);
+    y += 26;
+    doc.line(50, y, 260, y); doc.line(335, y, 545, y);
+    y += 14;
+    doc.text(CLAUSES.date, 50, y); doc.text(CLAUSES.date, 335, y);
+    y += 30;
+  } else {
+    y += 30;
+  }
+
+  doc.setFont('helvetica','italic'); doc.setFontSize(9.5); doc.setTextColor(...muted);
+  doc.text(inv.lang==='fr' ? (appSettings.invoice_footer_fr||'Merci de votre confiance.') : (appSettings.invoice_footer_en||'Thank you for your business.'), 50, y);
+
+  return doc;
+}
+function fmtMoney2(n, lang){
+  n = Number(n)||0;
+  return (lang==='fr' ? n.toLocaleString('fr-CA',{minimumFractionDigits:2,maximumFractionDigits:2})+' $' : '$'+n.toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2}));
+}
+
+function previewInvoicePDF(){
+  const inv = buildInvoiceObject();
+  const doc = generateInvoicePDF(inv);
+  const blobUrl = doc.output('bloburl');
+  document.getElementById('inv-pdf-frame').src = blobUrl;
+}
+function downloadInvoicePDF(){
+  const inv = buildInvoiceObject();
+  const doc = generateInvoicePDF(inv);
+  doc.save(inv.invoice_number+'.pdf');
+}
+
+// ── MESSAGE COURRIEL (texte brut, copier-coller manuel — aucune configuration requise) ──
+function buildEmailText(inv){
+  const isFr = inv.lang==='fr';
+  const docWord = inv.include_contract ? (isFr?'facture-contrat':'invoice-contract') : (isFr?'facture':'invoice');
+  const subject = isFr
+    ? `Votre ${docWord} Novaris Solution — ${inv.invoice_number}`
+    : `Your Novaris Solution ${docWord} — ${inv.invoice_number}`;
+  const contractNote = inv.include_contract
+    ? (isFr
+        ? "Ce document inclut le détail du forfait ainsi que les conditions contractuelles. Merci d'y apposer votre signature et de nous la retourner.\n\n"
+        : "This document includes the package details and the contract terms. Please sign it and return it to us.\n\n")
+    : '';
+  const body = isFr
+    ? `Bonjour ${inv.client_name||''},\n\nVeuillez trouver ci-joint votre ${docWord} ${inv.invoice_number} pour ${inv.client_business||'votre entreprise'}, d'un montant total de ${fmtMoney2(inv.total_amount,'fr')}.\n\n${contractNote}Merci de votre confiance,\nPatrick Essono\nNovaris Solution Inc.\n${appSettings.company_email||'p_essono@hotmail.com'}`
+    : `Hi ${inv.client_name||''},\n\nPlease find attached your ${docWord} ${inv.invoice_number} for ${inv.client_business||'your business'}, totaling ${fmtMoney2(inv.total_amount,'en')}.\n\n${contractNote}Thank you for your business,\nPatrick Essono\nNovaris Solution Inc.\n${appSettings.company_email||'p_essono@hotmail.com'}`;
+  return { subject, body };
+}
+function generateEmailMessage(){
+  const inv = buildInvoiceObject();
+  if(!inv.client_name && !inv.client_business){
+    showToast(LANG==='fr' ? "Ajoute au moins le nom du client avant de générer le message." : "Add at least the client's name before generating the message.");
+  }
+  const { subject, body } = buildEmailText(inv);
+  const subjLabel = LANG==='fr' ? 'Objet' : 'Subject';
+  document.getElementById('inv-email-text').value = `${subjLabel}: ${subject}\n\n${body}`;
+}
+function copyEmailMessage(){
+  const el = document.getElementById('inv-email-text');
+  if(!el.value.trim()){ generateEmailMessage(); }
+  navigator.clipboard.writeText(el.value).then(()=>{
+    showToast(LANG==='fr' ? 'Message copié — colle-le dans ton courriel.' : 'Message copied — paste it into your email.');
+  });
+}
+
+async function saveAndSendInvoice(){
+  const inv = buildInvoiceObject();
+  if(!inv.client_email){
+    showToast(LANG==='fr' ? 'Ajoutez un courriel client pour envoyer la facture.' : 'Add a client email to send the invoice.');
+    return;
+  }
+  inv.status = 'sent';
+  const { data, error } = await sb.from('invoices').insert([inv]).select().single();
+  if(error){ showToast('Erreur: '+error.message); return; }
+
+  // Génère les versements si récurrent
+  if(inv.frequency !== 'unique' && inv.installments_count > 1){
+    const start = document.getElementById('inv-start').value ? new Date(document.getElementById('inv-start').value) : new Date();
+    const installments = [];
+    const perAmount = +(inv.total_amount / inv.installments_count).toFixed(2);
+    for(let i=0;i<inv.installments_count;i++){
+      const d = new Date(start);
+      if(inv.frequency==='mensuel') d.setMonth(d.getMonth()+i);
+      else if(inv.frequency==='hebdomadaire') d.setDate(d.getDate()+7*i);
+      else if(inv.frequency==='annuel') d.setFullYear(d.getFullYear()+i);
+      installments.push({invoice_id:data.id, seq:i+1, due_date:d.toISOString().slice(0,10), amount:perAmount, paid:false});
+    }
+    await sb.from('invoice_installments').insert(installments);
+  }
+
+  const doc = generateInvoicePDF(inv);
+  const pdfBase64 = doc.output('datauristring').split(',')[1];
+  const { L } = invoiceHTMLDoc(inv);
+  const subject = inv.lang==='fr' ? `Votre facture Novaris Solution — ${inv.invoice_number}` : `Your Novaris Solution invoice — ${inv.invoice_number}`;
+  const html = inv.lang==='fr'
+    ? `<p>Bonjour ${inv.client_name||''},</p><p>Veuillez trouver ci-joint votre facture <strong>${inv.invoice_number}</strong> pour ${inv.client_business||'votre entreprise'}, d'un montant total de ${fmtMoney2(inv.total_amount,'fr')}.</p><p>Merci de votre confiance,<br>Patrick Essono — Novaris Solution Inc.</p>`
+    : `<p>Hi ${inv.client_name||''},</p><p>Please find attached your invoice <strong>${inv.invoice_number}</strong> for ${inv.client_business||'your business'}, totaling ${fmtMoney2(inv.total_amount,'en')}.</p><p>Thank you for your business,<br>Patrick Essono — Novaris Solution Inc.</p>`;
+
+  try{
+    const resp = await fetch(SEND_INVOICE_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json', 'Authorization':'Bearer '+SUPABASE_ANON_KEY},
+      body: JSON.stringify({ to: inv.client_email, subject, html, pdf_base64: pdfBase64, filename: inv.invoice_number+'.pdf' })
+    });
+    const result = await resp.json();
+    if(!resp.ok) throw new Error(result.error ? JSON.stringify(result.error) : 'Erreur inconnue');
+    await sb.from('invoices').update({sent_at:new Date().toISOString()}).eq('id',data.id);
+    showToast(LANG==='fr' ? `Facture ${inv.invoice_number} envoyée à ${inv.client_email}` : `Invoice ${inv.invoice_number} sent to ${inv.client_email}`);
+  }catch(e){
+    showToast((LANG==='fr' ? 'Facture enregistrée, mais l\'envoi a échoué : ' : 'Invoice saved, but sending failed: ') + e.message);
+  }
+  loadInvoices();
+}
+
+async function loadInvoices(){
+  const { data } = await sb.from('invoices').select('*, invoice_installments(*)').order('created_at',{ascending:false});
+  allInvoices = data || [];
+  renderFinMetrics();
+  renderInvoicesList();
+}
+
+function renderFinMetrics(){
+  if(!allInvoices) return;
+  const active = allInvoices.filter(i=>i.status!=='cancelled');
+  const concluded = active.reduce((s,i)=>s+(Number(i.total_amount)||0),0);
+  let paid = 0, due = 0;
+  active.forEach(i=>{
+    const installs = i.invoice_installments||[];
+    if(installs.length){
+      installs.forEach(x=>{ if(x.paid) paid += Number(x.amount)||0; else due += Number(x.amount)||0; });
+    } else {
+      if(i.status==='paid') paid += Number(i.total_amount)||0; else due += Number(i.total_amount)||0;
+    }
+  });
+  const taxRate = appSettings.tax_rate||0;
+  const taxOnCollected = +(paid*taxRate/100).toFixed(2);
+  const net = +(paid - taxOnCollected).toFixed(2);
+  document.getElementById('fm-1').textContent = fmtMoney(concluded);
+  document.getElementById('fm-2').textContent = fmtMoney(paid);
+  document.getElementById('fm-3').textContent = fmtMoney(due);
+  document.getElementById('fm-4').textContent = fmtMoney(net);
+  document.getElementById('fm-tax-val').textContent = fmtMoney(taxOnCollected);
+}
+
+function invStatusBadge(s){
+  const map = {draft:'b-draft',sent:'b-sent',paid:'b-paid',overdue:'b-overdue',cancelled:'b-cancelled'};
+  const labels = LANG==='fr'
+    ? {draft:'Brouillon',sent:'Envoyée',paid:'Payée',overdue:'En retard',cancelled:'Annulée'}
+    : {draft:'Draft',sent:'Sent',paid:'Paid',overdue:'Overdue',cancelled:'Cancelled'};
+  return `<span class="badge ${map[s]||'b-draft'}">${labels[s]||s}</span>`;
+}
+
+function renderInvoicesList(){
+  const list = document.getElementById('invoices-list');
+  if(!allInvoices.length){ list.innerHTML = `<div class="empty-state" id="inv-empty">${LANG==='fr'?'Aucune facture pour le moment.':'No invoices yet.'}</div>`; return; }
+  list.innerHTML = allInvoices.map(i=>`
+    <div class="inv-row">
+      <div class="num">${i.invoice_number}</div>
+      <div><div class="biz">${i.client_name||'—'} · ${i.client_business||'—'}</div><div class="sub">${i.package_label||''} · ${i.frequency}</div></div>
+      <div class="amt">${fmtMoney(Number(i.total_amount)||0)}</div>
+      ${invStatusBadge(i.status)}
+      <div class="sv-field-actions">
+        <button onclick='markInvoicePaid("${i.id}")' title="${LANG==='fr'?'Marquer payée':'Mark paid'}">✓</button>
+        <button onclick='deleteInvoice("${i.id}")' title="${LANG==='fr'?'Supprimer':'Delete'}">✕</button>
+      </div>
+    </div>`).join('');
+}
+async function markInvoicePaid(id){
+  await sb.from('invoices').update({status:'paid', paid_at:new Date().toISOString()}).eq('id',id);
+  await sb.from('invoice_installments').update({paid:true, paid_at:new Date().toISOString()}).eq('invoice_id',id);
+  loadInvoices();
+}
+async function deleteInvoice(id){
+  if(!confirm(LANG==='fr'?'Supprimer cette facture ?':'Delete this invoice?')) return;
+  await sb.from('invoices').delete().eq('id',id);
+  loadInvoices();
+}
+
+// ══════════════════════════════════════════════════════════
+// CONSTRUCTEUR DE SURVEY
+// ══════════════════════════════════════════════════════════
+let surveyFields = [];
+let editingFieldId = null;
+
+async function loadSurveyConfig(){
+  const { data } = await sb.from('survey_config').select('*').order('step_number').order('sort_order');
+  surveyFields = data || [];
+  renderSurveyBuilder();
+  if(typeof renderList === 'function' && allData.length) renderList();
+}
+
+function renderSurveyBuilder(){
+  const wrap = document.getElementById('sv-steps-list');
+  if(!wrap) return;
+  const steps = {};
+  surveyFields.forEach(f=>{ (steps[f.step_number] = steps[f.step_number]||[]).push(f); });
+  const stepNums = Object.keys(steps).map(Number).sort((a,b)=>a-b);
+  wrap.innerHTML = stepNums.map(sn=>{
+    const fields = steps[sn];
+    return `<div class="sv-step-card">
+      <div class="sv-step-head"><span>${LANG==='fr'?'Étape':'Step'} ${sn} — ${fields[0].question_fr}</span>
+        <button class="btn btn-outline btn-sm" onclick="addFieldToStep(${sn})">+ ${LANG==='fr'?'Champ':'Field'}</button>
+      </div>
+      ${fields.map(f=>`
+        <div class="sv-field-row ${!f.active?'sv-inactive':''}">
+          <div class="sv-field-info">${LANG==='fr'?f.question_fr:f.question_en} <span class="k">${f.field_key} · ${f.field_type}</span></div>
+          <div class="sv-field-actions">
+            <button onclick="editField('${f.id}')" title="${LANG==='fr'?'Modifier':'Edit'}">✎</button>
+            <button onclick="deleteField('${f.id}')" title="${LANG==='fr'?'Supprimer':'Delete'}">✕</button>
+          </div>
+        </div>`).join('')}
+    </div>`;
+  }).join('') || `<div class="empty-state">${LANG==='fr'?'Aucune question configurée.':'No questions configured yet.'}</div>`;
+}
+
+function blankField(stepNumber){
+  return { id:null, step_number:stepNumber, sort_order:1, field_key:'', field_type:'text',
+    question_fr:'', question_en:'', subtitle_fr:'', subtitle_en:'', placeholder_fr:'', placeholder_en:'',
+    options:[], min_val:0, max_val:100, step_val:1, prefix:'', suffix:'', required:false, active:true };
+}
+function addNewStep(){
+  const maxStep = surveyFields.length ? Math.max(...surveyFields.map(f=>f.step_number)) : 0;
+  openFieldEditor(blankField(maxStep+1));
+}
+function addFieldToStep(stepNumber){
+  const inStep = surveyFields.filter(f=>f.step_number===stepNumber);
+  const maxSort = inStep.length ? Math.max(...inStep.map(f=>f.sort_order)) : 0;
+  const f = blankField(stepNumber); f.sort_order = maxSort+1;
+  openFieldEditor(f);
+}
+function editField(id){
+  const f = surveyFields.find(x=>x.id===id);
+  if(f) openFieldEditor(JSON.parse(JSON.stringify(f)));
+}
+async function deleteField(id){
+  if(!confirm(LANG==='fr'?'Supprimer cette question ?':'Delete this question?')) return;
+  await sb.from('survey_config').delete().eq('id',id);
+  loadSurveyConfig();
+}
+
+function openFieldEditor(f){
+  editingFieldId = f.id;
+  const needsOptions = ['radio','checkbox','select','importance'].includes(f.field_type);
+  const needsRange = f.field_type==='range';
+  const editor = document.getElementById('sv-editor');
+  editor.innerHTML = `
+    <div class="card-title" style="margin-bottom:12px">${f.id ? (LANG==='fr'?'Modifier la question':'Edit question') : (LANG==='fr'?'Nouvelle question':'New question')}</div>
+    <div class="pf">
+      <label>${LANG==='fr'?'Clé technique (unique, sans espace)':'Field key (unique, no spaces)'}</label>
+      <input type="text" id="sf-key" value="${f.field_key}" ${f.id?'disabled':''} placeholder="ex. feat_livechat">
+      <div class="inv-form-row">
+        <div><label>${LANG==='fr'?'Étape #':'Step #'}</label><input type="number" id="sf-step" value="${f.step_number}"></div>
+        <div><label>${LANG==='fr'?"Ordre dans l'étape":'Order in step'}</label><input type="number" id="sf-order" value="${f.sort_order}"></div>
+      </div>
+      <label>${LANG==='fr'?'Type de champ':'Field type'}</label>
+      <select id="sf-type" onchange="onFieldTypeChange(this.value)">
+        ${['text','textarea','radio','checkbox','select','range','importance'].map(t=>`<option value="${t}" ${f.field_type===t?'selected':''}>${t}</option>`).join('')}
+      </select>
+      <label>${LANG==='fr'?'Question (FR)':'Question (FR)'}</label><input type="text" id="sf-qfr" value="${(f.question_fr||'').replace(/"/g,'&quot;')}">
+      <label>Question (EN)</label><input type="text" id="sf-qen" value="${(f.question_en||'').replace(/"/g,'&quot;')}">
+      <label>${LANG==='fr'?'Sous-titre étape (FR, optionnel)':'Step subtitle (FR, optional)'}</label><input type="text" id="sf-subfr" value="${(f.subtitle_fr||'').replace(/"/g,'&quot;')}">
+      <label>${LANG==='fr'?'Sous-titre étape (EN, optionnel)':'Step subtitle (EN, optional)'}</label><input type="text" id="sf-suben" value="${(f.subtitle_en||'').replace(/"/g,'&quot;')}">
+      <div id="sf-options-wrap" style="display:${needsOptions?'block':'none'}">
+        <label>${LANG==='fr'?'Options (valeur / FR / EN)':'Options (value / FR / EN)'}</label>
+        <div id="sf-options-list"></div>
+        <button class="btn btn-outline btn-sm" onclick="addOptionRow()">+ ${LANG==='fr'?'Option':'Option'}</button>
+      </div>
+      <div id="sf-range-wrap" style="display:${needsRange?'block':'none'}">
+        <div class="inv-form-row">
+          <div><label>Min</label><input type="number" id="sf-min" value="${f.min_val??0}"></div>
+          <div><label>Max</label><input type="number" id="sf-max" value="${f.max_val??100}"></div>
+        </div>
+        <div class="inv-form-row">
+          <div><label>${LANG==='fr'?'Pas':'Step'}</label><input type="number" id="sf-step-val" value="${f.step_val??1}"></div>
+          <div><label>${LANG==='fr'?'Préfixe/Suffixe':'Prefix/Suffix'}</label><input type="text" id="sf-suffix" value="${f.suffix||''}" placeholder="$, /mois..."></div>
+        </div>
+      </div>
+      <div class="toggle-row"><input type="checkbox" id="sf-required" ${f.required?'checked':''}><label>${LANG==='fr'?'Obligatoire':'Required'}</label></div>
+      <div class="toggle-row"><input type="checkbox" id="sf-active" ${f.active?'checked':''}><label>${LANG==='fr'?'Actif (visible sur le survey public)':'Active (visible on public survey)'}</label></div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn btn-brand" style="flex:1;justify-content:center" onclick="saveField()">${LANG==='fr'?'Enregistrer':'Save'}</button>
+        <button class="btn btn-outline" onclick="renderSurveyBuilder();document.getElementById('sv-editor').innerHTML='<div class=\\'empty-state\\' id=\\'sv-editor-empty\\'>'+(LANG==='fr'?'Sélectionnez une question à gauche pour la modifier, ou créez-en une nouvelle.':'Select a question on the left to edit it, or create a new one.')+'</div>'">${LANG==='fr'?'Annuler':'Cancel'}</button>
+      </div>
+    </div>`;
+  window._optRows = (f.options && f.options.length) ? JSON.parse(JSON.stringify(f.options)) : [];
+  renderOptionRows();
+}
+function onFieldTypeChange(t){
+  const needsOptions = ['radio','checkbox','select','importance'].includes(t);
+  document.getElementById('sf-options-wrap').style.display = needsOptions?'block':'none';
+  document.getElementById('sf-range-wrap').style.display = t==='range'?'block':'none';
+}
+function renderOptionRows(){
+  const el = document.getElementById('sf-options-list');
+  if(!el) return;
+  el.innerHTML = (window._optRows||[]).map((o,i)=>`
+    <div class="opt-editor-row">
+      <input type="text" placeholder="valeur" value="${(o.value||'').replace(/"/g,'&quot;')}" onchange="window._optRows[${i}].value=this.value">
+      <input type="text" placeholder="FR" value="${(o.label_fr||'').replace(/"/g,'&quot;')}" onchange="window._optRows[${i}].label_fr=this.value">
+      <input type="text" placeholder="EN" value="${(o.label_en||'').replace(/"/g,'&quot;')}" onchange="window._optRows[${i}].label_en=this.value">
+      <button onclick="removeOptionRow(${i})" style="background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer">✕</button>
+    </div>`).join('');
+}
+function addOptionRow(){ window._optRows = window._optRows||[]; window._optRows.push({value:'',label_fr:'',label_en:''}); renderOptionRows(); }
+function removeOptionRow(i){ window._optRows.splice(i,1); renderOptionRows(); }
+
+async function saveField(){
+  const payload = {
+    field_key: document.getElementById('sf-key').value.trim(),
+    step_number: parseInt(document.getElementById('sf-step').value)||1,
+    sort_order: parseInt(document.getElementById('sf-order').value)||1,
+    field_type: document.getElementById('sf-type').value,
+    question_fr: document.getElementById('sf-qfr').value,
+    question_en: document.getElementById('sf-qen').value,
+    subtitle_fr: document.getElementById('sf-subfr').value,
+    subtitle_en: document.getElementById('sf-suben').value,
+    options: window._optRows||[],
+    min_val: parseFloat(document.getElementById('sf-min')?.value)||0,
+    max_val: parseFloat(document.getElementById('sf-max')?.value)||100,
+    step_val: parseFloat(document.getElementById('sf-step-val')?.value)||1,
+    suffix: document.getElementById('sf-suffix')?.value||'',
+    required: document.getElementById('sf-required').checked,
+    active: document.getElementById('sf-active').checked
+  };
+  if(!payload.field_key){ showToast(LANG==='fr'?'La clé technique est requise.':'Field key is required.'); return; }
+  if(editingFieldId){
+    await sb.from('survey_config').update(payload).eq('id',editingFieldId);
+  } else {
+    await sb.from('survey_config').insert([payload]);
+  }
+  showToast(LANG==='fr'?'Question enregistrée.':'Question saved.');
+  loadSurveyConfig();
+}
+
+// ══════════════════════════════════════════════════════════
+// LECTEUR GÉNÉRIQUE DE RÉPONSES (couvre les champs standards + personnalisés)
+// ══════════════════════════════════════════════════════════
+function getFieldValue(r, key){
+  if(r.responses_data && r.responses_data[key] !== undefined && r.responses_data[key] !== '') return r.responses_data[key];
+  if(r[key] !== undefined && r[key] !== null && r[key] !== '') return r[key];
+  return null;
+}
+function renderAllAnswers(r){
+  if(!surveyFields.length) return `<span style="color:var(--muted);font-size:.78rem">—</span>`;
+  const steps = {};
+  surveyFields.forEach(f=>{ (steps[f.step_number]=steps[f.step_number]||[]).push(f); });
+  const stepNums = Object.keys(steps).map(Number).sort((a,b)=>a-b);
+  return stepNums.map(sn=>{
+    const rows = steps[sn].map(f=>{
+      const v = getFieldValue(r, f.field_key);
+      if(v===null) return '';
+      return `<div class="det-item"><div class="dl">${LANG==='fr'?f.question_fr:f.question_en}</div><div class="dv">${v}</div></div>`;
+    }).filter(Boolean).join('');
+    return rows ? `<div class="det-section"><div class="det-label">${LANG==='fr'?'Étape':'Step'} ${sn}</div><div class="det-grid">${rows}</div></div>` : '';
+  }).join('');
 }
 
 // Init
-applyLang();
-loadAll();
+checkAuth();
+document.getElementById('inv-due').valueAsDate = new Date();
+genInvoiceNumber();
+onPkgChange();
 </script>
 </body>
 </html>
