@@ -528,7 +528,7 @@ const SEND_INVOICE_URL = SUPABASE_URL + '/functions/v1/send-invoice';
               <div class="inv-form-row" id="inv-due-wrap">
                 <div><label id="il-due">Date d'échéance</label><input type="date" id="inv-due"></div>
                 <div><label id="il-lang">Langue du document</label>
-                  <select id="inv-lang" onchange="renderFeatChips()"><option value="fr" id="ilang-fr">Français</option><option value="en" id="ilang-en">English</option></select>
+                  <select id="inv-lang"><option value="fr" id="ilang-fr">Français</option><option value="en" id="ilang-en">English</option></select>
                 </div>
               </div>
 
@@ -1234,20 +1234,6 @@ const INV_PKG = {
   full:{amount:6200, feats:['feat_chatbot','feat_seo','feat_automation','feat_booking','feat_portal','feat_payment']},
   custom:{amount:0, feats:[]}
 };
-const PKG_LABELS = {
-  fr: {
-    essential: 'Essentiel — 2 500 $',
-    growth:    'Croissance — 3 900 $',
-    full:      'Complet — 6 200 $',
-    custom:    'Personnalisé'
-  },
-  en: {
-    essential: 'Essential — $2,500',
-    growth:    'Growth — $3,900',
-    full:      'Full Suite — $6,200',
-    custom:    'Custom'
-  }
-};
 const ALL_FEAT_OPTIONS = [
   {key:'feat_chatbot', fr:'Chatbot IA (24/7)', en:'AI Chatbot (24/7)'},
   {key:'feat_quote', fr:'Formulaire de devis instantané', en:'Instant quote form'},
@@ -1270,8 +1256,7 @@ function genInvoiceNumber(){
 
 function renderFeatChips(){
   const wrap = document.getElementById('inv-feat-chips');
-  const docLang = document.getElementById('inv-lang').value;
-  wrap.innerHTML = ALL_FEAT_OPTIONS.map(f=>`<span class="chip ${selectedFeats.has(f.key)?'sel':''}" onclick="toggleFeat('${f.key}')">${docLang==='fr'?f.fr:f.en}</span>`).join('');
+  wrap.innerHTML = ALL_FEAT_OPTIONS.map(f=>`<span class="chip ${selectedFeats.has(f.key)?'sel':''}" onclick="toggleFeat('${f.key}')">${LANG==='fr'?f.fr:f.en}</span>`).join('');
 }
 function toggleFeat(key){
   if(selectedFeats.has(key)) selectedFeats.delete(key); else selectedFeats.add(key);
@@ -1343,11 +1328,10 @@ function buildInvoiceObject(){
     client_email: document.getElementById('inv-email').value,
     lang: document.getElementById('inv-lang').value,
     package_key: document.getElementById('inv-pkg').value,
-    package_label: (()=>{ const docL=document.getElementById('inv-lang').value; const pk=document.getElementById('inv-pkg').value; return (PKG_LABELS[docL]||PKG_LABELS['fr'])[pk] || document.getElementById('inv-pkg').selectedOptions[0].textContent; })(),
+    package_label: document.getElementById('inv-pkg').selectedOptions[0].textContent,
     features: Array.from(selectedFeats).map(k=>{
       const f = ALL_FEAT_OPTIONS.find(x=>x.key===k);
-      const docL = document.getElementById('inv-lang').value;
-      return f ? (docL==='fr'?f.fr:f.en) : k;
+      return f ? (LANG==='fr'?f.fr:f.en) : k;
     }),
     amount, tax_rate: appSettings.tax_rate||0, tax_amount: tax, total_amount: total,
     payment_method: document.getElementById('inv-method').value,
